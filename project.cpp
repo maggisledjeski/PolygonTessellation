@@ -9,7 +9,7 @@
 using namespace std;
 // These are defined in a global scope
 
-//global linked list of vertices
+//list <vertex> vList;
 //global linked list of line segments
 //global linked list of triangles
 struct vertex {
@@ -24,6 +24,7 @@ struct triangle {
     int x2, y2;
     int x3, y3;
 };
+list <vertex> vList;
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
@@ -173,7 +174,12 @@ void mouse( int button, int state, int x, int y )
 
   if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
      {
-        printf ("%d   %d\n", x, y);
+        printf ("%d   %d\n", x, y); //prints the mouse coordinates
+	vertex v;
+	v.x = x;
+	v.y = WINDOW_MAX_Y -y;
+	vList.push_back(v); //stores the screen coordinates
+	//printf("v:%d    %d\n\n",v.x,v.y); 
         drawBox( x, WINDOW_MAX_Y -y );
      }
 
