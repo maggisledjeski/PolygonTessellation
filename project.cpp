@@ -16,7 +16,10 @@ struct vertex {
     int x, y;
 };
 struct linseg {
-    //maybe two vertices
+    vertex one;
+    vertex two;
+    //build line equation
+    //draw line equation
 };
 struct triangle {
     //maybe three lines
@@ -24,6 +27,8 @@ struct triangle {
     int x2, y2;
     int x3, y3;
 };
+list <linseg> LList;
+list <vertex> lList;	//list of vertices that can make the linseg list
 list <vertex> vList;
 GLubyte red, green, blue;
 int COLORS_DEFINED;
@@ -95,8 +100,8 @@ void display( void )
 
     /* define point */
 
-    p[0] = 100; 
-    p[1] = 100;
+    //p[0] = 100; 
+    //p[1] = 100;
    
     /* plot new point */
 
@@ -145,6 +150,16 @@ float dP3 (vector a, vector b) //calculates the dot product for two vectors with
 }
 */
 
+void drawLinSeg(int x1, int x2, int y1, int y2)
+{
+    //connects lines to eachother but not to the previous line
+    glBegin(GL_LINES);
+    glVertex2i(x1,y1);
+    glVertex2i(x2,y2);
+    glEnd();
+    glFlush();
+}
+
 void eraseBox( int x, int y )
 {
     typedef GLfloat point[2];     
@@ -174,13 +189,42 @@ void mouse( int button, int state, int x, int y )
 
   if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
      {
-        printf ("%d   %d\n", x, y); //prints the mouse coordinates
+        //printf ("%d   %d\n", x, y); //prints the mouse coordinates
 	vertex v;
 	v.x = x;
 	v.y = WINDOW_MAX_Y -y;
 	vList.push_back(v); //stores the screen coordinates
-	//printf("v:%d    %d\n\n",v.x,v.y); 
-        drawBox( x, WINDOW_MAX_Y -y );
+	lList.push_back(v);
+	printf("v: %d   %d\n", v.x,v.y);
+
+	drawBox( x, WINDOW_MAX_Y -y );	
+
+	if(lList.size() == 2)
+	{
+		//adds lList vertices to the linseg l, which is added to the LList <linseg>
+		linseg l;
+		l.one = lList.front();
+		l.two = lList.back();
+		printf("l1: %d     %d\n", l.one.x,l.one.y);
+                printf("l2: %d     %d\n\n",l.two.x,l.two.y);
+		lList.pop_back();
+		lList.pop_back();
+		if(lList.empty())
+		{
+			printf("list <vertex> lList is empty!\n");
+		}
+		//adds the linseg l to the end of the LList
+		LList.push_back(l);
+		printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
+                printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
+		
+		//calculate the equations for the line, send to equation list?
+		//does the line interect any other lines?
+		//draw the line
+		
+		drawLinSeg(LList.back().one.x,LList.back().two.x,LList.back().one.y,LList.back().two.y);
+	}
+        //drawBox( x, WINDOW_MAX_Y -y );
      }
 
   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
