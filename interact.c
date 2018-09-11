@@ -6,18 +6,22 @@
 #include <stdio.h>
 
 // These are defined in a global scope
+
+//global linked list of vertices
+//global linked list of line segments
+//global linked list of triangles
 struct vertex {
     int x, y;
-}
+};
 struct linseg {
     //maybe two vertices
-}
+};
 struct triangle {
     //maybe three lines
     int x1, y1;
     int x2, y2;
     int x3, y3;
-}
+};
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
@@ -119,6 +123,24 @@ void drawBox( int x, int y )
         glFlush();
 }
 
+/* //will need to add pointers to point to vectors
+float dP2 (vector a, vector b) //calculates the dot product for two vectors with 2 components each
+{
+    float s1 = a1*b1;
+    float s2 = a2*b2;
+    float dp2 = s1 + s2;
+    return dp2;
+}
+
+float dP3 (vector a, vector b) //calculates the dot product for two vectors with 3 components each
+{
+    float s1 = a1*b1;
+    float s2 = a2*b2;
+    float s3 = a3*b3;
+    float dp3 = s1 + s2 + s3;
+    return dp3;
+}
+*/
 
 void eraseBox( int x, int y )
 {
@@ -170,12 +192,14 @@ void mouse( int button, int state, int x, int y )
 
 void keyboard( unsigned char key, int x, int y )
 { 
-    if (key == 'q' || key == 'Q') exit(0);
+    if (key == 'q' || key == 'Q') {
+	exit(0);
+    }
     if (key == 'f' || key == 'F') {
         //draw polygon filled in with no tesselation
     }
     if (key == 't' || key == 'T') {
-        //show the triangles used in the tesselationand the areas of the triangles IN THE ORDER THEY ARE DRAWN
+        //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
     }
     if (key == 'p' || key == 'P') {
         //polygons filled in after tesselation
