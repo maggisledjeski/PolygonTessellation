@@ -30,6 +30,7 @@ struct triangle {
 list <linseg> LList;
 list <vertex> lList;	//list of vertices that can make the linseg list
 list <vertex> vList;
+bool poly;
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
@@ -65,7 +66,7 @@ void myInit(void)
 
       glClearColor(1.0, 1.0, 1.0, 1.0); /* white background */
       glColor3f(1.0, 0.0, 0.0); /* draw in red */
-      glPointSize(10.0);
+      glPointSize(1.0);
 
       COLORS_DEFINED = 0;
 
@@ -150,12 +151,26 @@ float dP3 (vector a, vector b) //calculates the dot product for two vectors with
 }
 */
 
-void drawLinSeg(int x1, int x2, int y1, int y2)
+/*void drawLinSeg(int x1, int x2, int y1, int y2)
 {
     //connects lines to eachother but not to the previous line
-    glBegin(GL_LINES);
+    glBegin(GL_LINE_LOOP);
     glVertex2i(x1,y1);
     glVertex2i(x2,y2);
+    glEnd();
+    glFlush();
+}*/
+
+void drawLinSeg(vertex old_v, vertex new_v)
+{
+    if(old_v.x == 0 && old_v.y == 0)
+    {
+    	old_v.x = new_v.x;
+        old_v.y = new_v.y;
+    }
+    glBegin(GL_LINE_LOOP);
+    glVertex2i(old_v.x,old_v.y);
+    glVertex2i(new_v.x,new_v.y);
     glEnd();
     glFlush();
 }
@@ -183,6 +198,15 @@ void clearBox()
        glFlush();
 }
 
+bool polyFinished(list<vertex> vl)
+{
+    bool poly;
+    if(vl.front().x == vl.back().x && vl.front().y == vl.back().y)
+    {
+	poly = true;
+    }
+    return poly;
+}
 
 void mouse( int button, int state, int x, int y )
 { 
@@ -190,16 +214,24 @@ void mouse( int button, int state, int x, int y )
   if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
      {
         //printf ("%d   %d\n", x, y); //prints the mouse coordinates
+	//if(LList.front() == LList.back())
+	vertex prev_v = *prev(vList.end());
 	vertex v;
 	v.x = x;
 	v.y = WINDOW_MAX_Y -y;
 	vList.push_back(v); //stores the screen coordinates
-	lList.push_back(v);
+	//lList.push_back(v);
 	printf("v: %d   %d\n", v.x,v.y);
-
+	linseg l;
+	l.one = prev_v;
+	l.two = v;
+	LList.push_back(l);
+	//printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
+        //printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
+	drawLinSeg(prev_v,v);
 	drawBox( x, WINDOW_MAX_Y -y );	
 
-	if(lList.size() == 2)
+	/*if(lList.size() == 2)
 	{
 		//adds lList vertices to the linseg l, which is added to the LList <linseg>
 		linseg l;
@@ -223,14 +255,15 @@ void mouse( int button, int state, int x, int y )
 		//draw the line
 		
 		drawLinSeg(LList.back().one.x,LList.back().two.x,LList.back().one.y,LList.back().two.y);
-	}
+	}*/
         //drawBox( x, WINDOW_MAX_Y -y );
      }
 
   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
      {
         printf ("%d   %d\n", x, y);
-        eraseBox( x, WINDOW_MAX_Y -y );
+        polyFinished(vList);
+	eraseBox( x, WINDOW_MAX_Y -y );
      }
   
   if ( button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN )
@@ -271,7 +304,11 @@ int main(int argc, char** argv)
     // Now start the standard OpenGL glut callbacks //
     
     glutMouseFunc(mouse);  /* Define Mouse Handler */
+//polyFinished(vList);
+//if(poly == true)
+//{
     glutKeyboardFunc(keyboard); /* Define Keyboard Handler */
+//}
     glutDisplayFunc(display); /* Display callback invoked when window opened */
     glutMainLoop(); /* enter event loop */
 }
