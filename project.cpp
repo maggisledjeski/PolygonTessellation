@@ -30,7 +30,7 @@ struct triangle {
 list <linseg> LList;
 list <vertex> lList;	//list of vertices that can make the linseg list
 list <vertex> vList;
-bool poly;
+bool poly = false;
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
@@ -191,30 +191,52 @@ void eraseBox( int x, int y )
     glFlush();
 }
 
-
 void clearBox()
 {
        glClear(GL_COLOR_BUFFER_BIT); 
        glFlush();
 }
 
-bool polyFinished(list<vertex> vl)
+void tess(bool poly, list <linseg> LList)//do I need anything else brought in 
 {
-    bool poly;
-    if(vl.front().x == vl.back().x && vl.front().y == vl.back().y)
-    {
-	poly = true;
-    }
-    return poly;
 }
 
+float Determinant2(vertex a, vertex b)
+{
+    float d = (a.x * b.y) - (a.y * b.x);
+//    printf("%f",d);
+    return d;
+}
+
+void CP2(bool poly, list <linseg> LList)
+{
+    if(poly == true)
+    {
+        //run
+        LList.front().one;
+        //LList
+    }
+    else
+    {
+        printf("the polygon is not finished, left click on window to finsh the polygon");
+    }
+}
+
+void linIntersect(linseg a, linseg b)
+{
+    int P1 = b.one.x - a.one.x;
+    int P2 = -(b.two.x - b.one.x);
+    int P3 = b.one.y - a.one.y;
+    int P4 = -(b.two.y - b.one.y);
+
+}
 void mouse( int button, int state, int x, int y )
 { 
 
   if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
      {
         //printf ("%d   %d\n", x, y); //prints the mouse coordinates
-	//if(LList.front() == LList.back())
+	if(poly == false){
 	vertex prev_v = *prev(vList.end());
 	vertex v;
 	v.x = x;
@@ -229,8 +251,9 @@ void mouse( int button, int state, int x, int y )
 	//printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
         //printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
 	drawLinSeg(prev_v,v);
+	Determinant2(prev_v,v);
 	drawBox( x, WINDOW_MAX_Y -y );	
-
+	}
 	/*if(lList.size() == 2)
 	{
 		//adds lList vertices to the linseg l, which is added to the LList <linseg>
@@ -262,7 +285,7 @@ void mouse( int button, int state, int x, int y )
   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
      {
         printf ("%d   %d\n", x, y);
-        polyFinished(vList);
+        poly = true;
 	eraseBox( x, WINDOW_MAX_Y -y );
      }
   
@@ -304,11 +327,7 @@ int main(int argc, char** argv)
     // Now start the standard OpenGL glut callbacks //
     
     glutMouseFunc(mouse);  /* Define Mouse Handler */
-//polyFinished(vList);
-//if(poly == true)
-//{
     glutKeyboardFunc(keyboard); /* Define Keyboard Handler */
-//}
     glutDisplayFunc(display); /* Display callback invoked when window opened */
     glutMainLoop(); /* enter event loop */
 }
