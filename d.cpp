@@ -4,6 +4,7 @@
 #include <list>
 using namespace std;
 
+bool ccwb;
 struct vertex {
     int x, y,z;
 };
@@ -34,6 +35,21 @@ vertex cp(linseg a, linseg b)
     cpv.z = z;
     printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);  
     return cpv;
+}
+
+bool ccw(float cpvz)
+{
+    bool ccwb = false;
+    if(cpvz < 0.0)
+    {
+        ccwb = true;
+	cout << "True!" << endl;
+    }
+/*    else
+    {
+        ccbw = false;
+    }*/
+    //return ccbw;
 }
 
 float Determinant2(vertex a, vertex b)
@@ -110,7 +126,11 @@ int main(int argc, char** argv)
 	
         linIntersect(a,b);	
 	vertex cpv = cp(a,b);	
-//	float z = cpv.z;
+	float z = cpv.z;
+	bool ccwb = ccw(z);
+	if(ccwb == true){
+		cout << "TRUE!" << endl;
+	}
     //printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,z);
 
 }
