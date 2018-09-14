@@ -27,9 +27,9 @@ void linIntersect(linseg a, linseg b)
     float P8 = -(b.two.y - b.one.y);
 
     float P9 = a.two.x - a.one.x;
-    float P10 = -(b.one.x - a.one.x);
+    float P10 = b.one.x - a.one.x;
     float P11 = a.two.y - a.one.y;
-    float P12 = -(b.one.y - a.one.y);
+    float P12 = b.one.y - a.one.y;
 
     float d1 = (P1*P4) - (P2*P3);
     float d2 = (P5*P8) - (P6*P7);
