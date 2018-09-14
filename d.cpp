@@ -5,19 +5,35 @@
 using namespace std;
 
 struct vertex {
-    int x, y;
+    int x, y,z;
 };
 struct linseg {
     vertex one;
     vertex two;
+    //vertex three;
     //build line equation
     //draw line equation
 };
     
-void cp(linseg a, linseg b)
+vertex cp(linseg a, linseg b)
 {
-    vertex v;
-    v.x = 3;
+    vertex v1,v2,v3,v4;
+    v1 = a.one;
+    v2 = a.two;
+    v3 = b.one;
+    v4 = b.two;
+    
+    float x = (v1.y*v2.z)-(v1.z*v2.y);
+    float y = (v1.z *v2.x) - (v1.x *v2.z);
+    float z = (v1.x*v2.y) - (v1.y *v2.x);
+    printf("x: %f   y: %f   z: %f\n",x,y,z);
+
+    vertex cpv;
+    cpv.x = x;
+    cpv.y = y;
+    cpv.z = z;
+    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);  
+    return cpv;
 }
 
 float Determinant2(vertex a, vertex b)
@@ -69,12 +85,14 @@ void linIntersect(linseg a, linseg b)
 int main(int argc, char** argv)
 {
 	vertex v1;
-	v1.x = -7;
-	v1.y = -1;
-	
+	v1.x = -7.0;
+	v1.y = -1.0;
+	v1.z = 0.0;
+
 	vertex v2;
-	v2.x = 8;
-	v2.y = 3;
+	v2.x = 8.0;
+	v2.y = 3.0;
+	v2.z = 0.0;
 
 	vertex v3;
         v3.x = -2;
@@ -91,5 +109,8 @@ int main(int argc, char** argv)
 	b.two = v4;
 	
         linIntersect(a,b);	
-	
+	vertex cpv = cp(a,b);	
+//	float z = cpv.z;
+    //printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,z);
+
 }
