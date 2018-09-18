@@ -6,7 +6,7 @@ using namespace std;
 
 bool ccwb;
 struct vertex {
-    int x, y,z;
+    float x, y,z;
 };
 struct linseg {
     vertex one;
@@ -16,19 +16,32 @@ struct linseg {
     //draw line equation
 };
     
-vertex cp(linseg a, linseg b)
+vertex cp(linseg a1, linseg b1)
 {
     vertex v1,v2,v3,v4;
-    v1 = a.one;
-    v2 = a.two;
-    v3 = b.one;
-    v4 = b.two;
-    
-    float x = (v1.y*v2.z)-(v1.z*v2.y);
-    float y = (v1.z *v2.x) - (v1.x *v2.z);
-    float z = (v1.x*v2.y) - (v1.y *v2.x);
-    printf("x: %f   y: %f   z: %f\n",x,y,z);
+    v1 = a1.one;
+    v2 = a1.two;
+    v3 = b1.one;
+    v4 = b1.two;
 
+    //create the points v2 = v3
+    vertex a,b;
+    a.x = v1.x - v2.x;
+    a.y = v1.y - v2.y;
+    a.z = 0.0;
+    b.x = v4.x - v2.x;
+    b.y = v4.y - v2.y;
+    b.z = 0.0;
+    float t1 = a.y*b.z;
+    float t2 = a.z*b.y;
+    float x = (a.y*b.z) - (a.z*b.y);
+    float y = (b.z*a.x) - (b.x*a.z);
+    float z = (a.x*b.y) - (a.y*b.x);
+    //printf("x: %f   y: %f   z: %f\n",x,y,z);
+    //JUST FOR THE X COORDINATE!
+    cout << a.y<<"*"<<b.z<<"="<<a.y*b.z << endl;
+    cout <<a.z<<"*"<<b.y<<"="<<a.z*b.y<<endl;
+    cout <<t1-t2<<endl;
     vertex cpv;
     cpv.x = x;
     cpv.y = y;
@@ -117,19 +130,31 @@ int main(int argc, char** argv)
         vertex v4;
         v4.x = -1;
         v4.y = -2;
+	
+	vertex v5,v6,v7;
+	v5.x = 0.0;
+	v5.y = 0.0;
+	v6.x = 2.0;
+	v6.y = 2.0;
+	v7.x = 0.0;
+	v7.y = 4.0;
 
-	linseg a,b;
+	linseg a,b,c,d;
 	a.one = v1;
 	a.two = v2;
 	b.one = v3;
 	b.two = v4;
+	c.one = v5;
+	c.two = v6;
+	d.one = v6;
+	d.two = v7;
 	
-        linIntersect(a,b);	
-	vertex cpv = cp(a,b);	
+        //linIntersect(a,b);	
+	vertex cpv = cp(c,d);	
 	float z = cpv.z;
-	bool ccwb = ccw(z);
+	//bool ccwb = ccw(z);
 	if(ccwb == true){
-		cout << "TRUE!" << endl;
+		//cout << "CCW!" << endl;
 	}
     //printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,z);
 
