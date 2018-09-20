@@ -6,7 +6,7 @@ using namespace std;
 
 bool ccwb;
 struct vertex {
-    float x, y,z;
+    float x,y,z;
 };
 struct linseg {
     vertex one;
@@ -42,7 +42,12 @@ vertex cp(linseg a1, linseg b1)
     cout << a.y<<"*"<<b.z<<"="<<a.y*b.z << endl;
     cout <<a.z<<"*"<<b.y<<"="<<a.z*b.y<<endl;
     cout <<t1-t2<<endl;
-    vertex cpv;
+    
+	//JUST FOR THE Y COORDINATE!
+	cout <<a.x<<"*"<<b.z<<"="<<a.x*b.z<< endl;
+    cout <<a.z<<"*"<<b.x<<"="<<a.z*b.x<<endl;
+    
+	vertex cpv;
     cpv.x = x;
     cpv.y = y;
     cpv.z = z;
@@ -124,12 +129,12 @@ int main(int argc, char** argv)
 	v2.z = 0.0;
 
 	vertex v3;
-        v3.x = -2;
-        v3.y = 1;
+    v3.x = -2.0;
+    v3.y = 1.0;
 
-        vertex v4;
-        v4.x = -1;
-        v4.y = -2;
+    vertex v4;
+    v4.x = -1.0;
+    v4.y = -2.0;
 	
 	vertex v5,v6,v7;
 	v5.x = 0.0;
@@ -149,7 +154,7 @@ int main(int argc, char** argv)
 	d.one = v6;
 	d.two = v7;
 	
-        //linIntersect(a,b);	
+    linIntersect(a,b);	
 	vertex cpv = cp(c,d);	
 	float z = cpv.z;
 	//bool ccwb = ccw(z);
