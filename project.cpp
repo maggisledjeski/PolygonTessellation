@@ -248,10 +248,10 @@ bool linIntersect(linseg a, linseg b)
     float ua = d1/d2;
     float ub = d3/d2;
     //printf("ua: %f\nub: %f\n",ua,ub);
-    if(0<ua<1 && 0<ub<1)
+    if(((0.0 < ua) && (ua < 1.0)) && (((0.0 < ub) && (ub < 1.0))))
     {
-	intersect = true;
-	cout << intersect << endl;
+		intersect = true;
+		cout << intersect << endl;
     }
     float x = a.one.x + ua*(a.two.x - a.one.x);
     float y = a.one.y + ua*(a.two.y - a.one.y);
@@ -277,15 +277,17 @@ void mouse( int button, int state, int x, int y )
 	linseg prev_l = *prev(LList.end());
 	l.one = prev_v;
 	l.two = v;
-	bool ib1,ib2=false;
+	bool ib1=false,ib2=false;
 	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); ++it)
 	{
 		ib1 = linIntersect(l,*it);
-		if(ib1 == true && ib2 == false)
+		//there is an intersect present with the current linseg and the one being tested and resets the bool
+		if(ib1 == true)
 		{
-			ib2 = true;
-			cout << "mouse: " << ib2 << endl;
+			cout << "there is an intersect with the last linseg drawn." << endl;
+			ib1 = false;
 		}
+		
 	}
 	if(ib2 == false)
 	{
