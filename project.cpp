@@ -13,7 +13,7 @@ using namespace std;
 //global linked list of line segments
 //global linked list of triangles
 struct vertex {
-    int x, y;
+    float x, y, z;
 };
 struct linseg {
     vertex one;
@@ -222,13 +222,42 @@ void CP2(bool poly, list <linseg> LList)
     }
 }
 
-void linIntersect(linseg a, linseg b)
+
+bool linIntersect(linseg a, linseg b)
 {
+    bool intersect = false;
     int P1 = b.one.x - a.one.x;
     int P2 = -(b.two.x - b.one.x);
     int P3 = b.one.y - a.one.y;
     int P4 = -(b.two.y - b.one.y);
+    
+    float P5 = a.two.x - a.one.x;
+    float P6 = -(b.two.x - b.one.x);
+    float P7 = a.two.y - a.one.y;
+    float P8 = -(b.two.y - b.one.y);
 
+    float P9 = a.two.x - a.one.x;
+    float P10 = b.one.x - a.one.x;
+    float P11 = a.two.y - a.one.y;
+    float P12 = b.one.y - a.one.y;
+
+    float d1 = (P1*P4) - (P2*P3);
+    float d2 = (P5*P8) - (P6*P7);
+    float d3 = (P9*P12) - (P10*P11);
+
+    float ua = d1/d2;
+    float ub = d3/d2;
+    //printf("ua: %f\nub: %f\n",ua,ub);
+    if(0<ua<1 && 0<ub<1)
+    {
+	intersect = true;
+	cout << intersect << endl;
+    }
+    float x = a.one.x + ua*(a.two.x - a.one.x);
+    float y = a.one.y + ua*(a.two.y - a.one.y);
+    //printf("x = %f\ny = %f\n",x,y);
+    
+    return intersect;
 }
 void mouse( int button, int state, int x, int y )
 { 
@@ -245,9 +274,23 @@ void mouse( int button, int state, int x, int y )
 	//lList.push_back(v);
 	printf("v: %d   %d\n", v.x,v.y);
 	linseg l;
+	linseg prev_l = *prev(LList.end());
 	l.one = prev_v;
 	l.two = v;
-	LList.push_back(l);
+	bool ib1,ib2=false;
+	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); ++it)
+	{
+		ib1 = linIntersect(l,*it);
+		if(ib1 == true && ib2 == false)
+		{
+			ib2 = true;
+			cout << "mouse: " << ib2 << endl;
+		}
+	}
+	if(ib2 == false)
+	{
+		LList.push_back(l);
+	}
 	//printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
         //printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
 	drawLinSeg(prev_v,v);
