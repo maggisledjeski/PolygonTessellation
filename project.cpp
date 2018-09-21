@@ -277,6 +277,32 @@ void fillPoly(list <linseg> LList)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glFlush();
 }
+void drawLinSegList(list <linseg> LList)
+{
+    glBegin(GL_LINE_LOOP);
+    for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
+    {
+        glVertex2f((*it).one.x,(*it).one.y);
+        glVertex2f((*it).two.x,(*it).two.y);
+    }
+    glEnd();
+    glFlush();
+}
+
+void returnPoly(list <linseg> LList)
+{
+    for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+    	glBegin(GL_POLYGON);
+		glVertex2f((*it).one.x,(*it).one.y);
+        glVertex2f((*it).two.x,(*it).two.y);
+    	glEnd();
+    	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    	glFlush();
+	}
+	drawLinSegList(LList);
+}
 
 vertex cp(linseg a1, linseg b1)
 {
@@ -381,8 +407,9 @@ void keyboard( unsigned char key, int x, int y )
     if (key == 'p' || key == 'P') {
         //polygons filled in after tesselation
     }
-    if (key == 'l' || key == 'L') {
+    if (key == 'l' || key == 'L' && poly == true) {
         //should return the screen to the original outline of the polygon
+        returnPoly(LList);
     }
 }
 
