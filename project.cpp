@@ -197,8 +197,9 @@ void clearBox()
        glFlush();
 }
 
-void tess(bool poly, list <linseg> LList)//do I need anything else brought in 
+void tess(list <linseg> LList)//do I need anything else brought in 
 {
+	
 }
 
 float Determinant2(vertex a, vertex b)
@@ -331,6 +332,29 @@ vertex cp(linseg a1, linseg b1)
     return cpv;
 }
 
+vertex cp1(vertex v1, vertex v2, vertex v3)
+{
+    vertex a,b;
+    a.x = v1.x - v2.x;
+    a.y = v1.y - v2.y;
+    a.z = 0.0;
+    b.x = v3.x - v2.x;
+    b.y = v3.y - v2.y;
+    b.z = 0.0;
+    float t1 = a.y*b.z;
+    float t2 = a.z*b.y;
+    float x = (a.y*b.z) - (a.z*b.y);
+    float y = (b.z*a.x) - (b.x*a.z);
+    float z = (a.x*b.y) - (a.y*b.x);
+
+    vertex cpv;
+    cpv.x = x;
+    cpv.y = y;
+    cpv.z = z;
+    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
+    return cpv;
+}
+
 void mouse( int button, int state, int x, int y )
 { 
 	if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
@@ -397,17 +421,17 @@ void keyboard( unsigned char key, int x, int y )
     if (key == 'q' || key == 'Q') {
 	exit(0);
     }
-    if (key == 'f' || key == 'F' && poly == true) {
+    if ((key == 'f' || key == 'F') && poly == true) {
         //draw polygon filled in with no tesselation
         fillPoly(LList);
     }
-    if (key == 't' || key == 'T') {
+    if ((key == 't' || key == 'T') && poly == true) {
         //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
     }
-    if (key == 'p' || key == 'P') {
+    if ((key == 'p' || key == 'P') && poly == true) {
         //polygons filled in after tesselation
     }
-    if (key == 'l' || key == 'L' && poly == true) {
+    if ((key == 'l' || key == 'L') && poly == true) {
         //should return the screen to the original outline of the polygon
         returnPoly(LList);
     }

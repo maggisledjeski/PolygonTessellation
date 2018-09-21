@@ -15,7 +15,7 @@ struct linseg {
     //build line equation
     //draw line equation
 };
-    
+list <vertex> vList;    
 vertex cp(linseg a1, linseg b1)
 {
     vertex v1,v2,v3,v4;
@@ -37,15 +37,6 @@ vertex cp(linseg a1, linseg b1)
     float x = (a.y*b.z) - (a.z*b.y);
     float y = (b.z*a.x) - (b.x*a.z);
     float z = (a.x*b.y) - (a.y*b.x);
-    //printf("x: %f   y: %f   z: %f\n",x,y,z);
-    //JUST FOR THE X COORDINATE!
-    cout << a.y<<"*"<<b.z<<"="<<a.y*b.z << endl;
-    cout <<a.z<<"*"<<b.y<<"="<<a.z*b.y<<endl;
-    cout <<t1-t2<<endl;
-    
-	//JUST FOR THE Y COORDINATE!
-	cout <<a.x<<"*"<<b.z<<"="<<a.x*b.z<< endl;
-    cout <<a.z<<"*"<<b.x<<"="<<a.z*b.x<<endl;
     
 	vertex cpv;
     cpv.x = x;
@@ -116,6 +107,59 @@ void linIntersect(linseg a, linseg b)
 
 }
 
+vertex cp1(vertex v1, vertex v2, vertex v3)
+{
+	vertex a,b;
+    a.x = v1.x - v2.x;
+    a.y = v1.y - v2.y;
+    a.z = 0.0;
+    b.x = v3.x - v2.x;
+    b.y = v3.y - v2.y;
+    b.z = 0.0;
+    float t1 = a.y*b.z;
+    float t2 = a.z*b.y;
+    float x = (a.y*b.z) - (a.z*b.y);
+    float y = (b.z*a.x) - (b.x*a.z);
+    float z = (a.x*b.y) - (a.y*b.x);
+    
+    vertex cpv;
+    cpv.x = x;
+    cpv.y = y;
+    cpv.z = z;
+    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
+    return cpv;
+}
+
+void tesselate(list <vertex> vList)
+{
+	vertex start = vList.front();
+	list<vertex>::iterator it=vList.begin(); 
+	//while(vList.size() > 0)
+    //{
+        vertex a,b;
+		advance(it,1);
+		a = *it;
+		advance(it,1);
+		b = *it;
+		vertex cpv = cp1(start,a,b);
+        if(cpv.z < 0.0)
+		{
+			cout <<"ccw"<<endl;
+			//vList.remove((*it));
+		//cout<<*prev((*it).x)<<" " << *prev((*it).y)<<endl;
+		//cout << b.x << " "<< b.y<<endl;
+		vertex c = *prev(it);
+		cout <<"removed: "<< c.x << " "<< c.y<< endl;
+		vList.erase(prev(it));
+		//vList.remove(a.y);
+		for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+		{
+			cout << (*i).x <<" "<<(*i).y << endl;
+		}
+		}
+    //}
+}
+
 int main(int argc, char** argv)
 {
 	vertex v1;
@@ -154,13 +198,19 @@ int main(int argc, char** argv)
 	d.one = v6;
 	d.two = v7;
 	
-    linIntersect(a,b);	
-	vertex cpv = cp(c,d);	
+	vList.push_back(v5);
+	vList.push_back(v6);
+	vList.push_back(v7);
+	tesselate(vList);
+
+    /*linIntersect(a,b);	
+	//vertex cpv = cp(c,d);	
+	vertex cpv = cp1(v5,v6,v7);
 	float z = cpv.z;
 	//bool ccwb = ccw(z);
 	if(ccwb == true){
 		//cout << "CCW!" << endl;
 	}
     //printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,z);
-
+	*/
 }
