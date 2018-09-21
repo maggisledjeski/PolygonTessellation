@@ -265,17 +265,17 @@ bool linIntersect(linseg a, linseg b)
 
 void fillPoly(list <linseg> LList)
 {
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0f,0.0f,0.0f);
+    glBegin(GL_POLYGON);
 	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
     {
-    	//cout << (*it).one.x << " " << (*it).one.y <<endl;
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBegin(GL_POLYGON);
-		glVertex2f((*it).one.x,(*it).one.y);
-		glEnd();
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glFlush();
+    	glVertex2f((*it).one.x,(*it).one.y);
+		glVertex2f((*it).two.x,(*it).two.y);
     }
-
+	glEnd();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glFlush();
 }
 
 vertex cp(linseg a1, linseg b1)
