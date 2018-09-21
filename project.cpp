@@ -22,13 +22,12 @@ struct linseg {
     //draw line equation
 };
 struct triangle {
-    //maybe three lines
-    int x1, y1;
-    int x2, y2;
-    int x3, y3;
+    vertex one;
+    vertex two;
+	vertex three;
 };
 list <linseg> LList;
-list <vertex> lList;	//list of vertices that can make the linseg list
+list <triangle> tList;
 list <vertex> vList;
 bool poly = false;
 GLubyte red, green, blue;
@@ -197,11 +196,6 @@ void clearBox()
        glFlush();
 }
 
-void tess(list <linseg> LList)//do I need anything else brought in 
-{
-	
-}
-
 float Determinant2(vertex a, vertex b)
 {
     float d = (a.x * b.y) - (a.y * b.x);
@@ -354,6 +348,55 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
     return cpv;
 }
+void tess(list <vertex> vList,list <triangle> tList)                                    
+{
+    vertex start = vList.front();
+    list<vertex>::iterator it=vList.begin();
+    while(vList.size() > 3)
+    {
+        vertex a,b;
+        advance(it,1);
+        a = *it;
+        advance(it,1);
+        b = *it;
+        vertex cpv = cp1(start,a,b);
+        if(cpv.z < 0.0)
+        {
+            cout <<"ccw"<<endl;
+            //drawLinSeg(start,b);
+			glBegin(GL_LINES);
+			glVertex2f(start.x,start.y);
+			glVertex2f(b.x,b.y);
+			glEnd();
+			glFlush();
+			triangle t;
+			t.one = start;
+			t.two = a;
+			t.three = b;
+            tList.push_back(t);
+			vertex c = *prev(it);
+            cout <<"removed: "<< c.x << " "<< c.y<< endl;
+            vList.erase(prev(it));
+            for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+            {
+                cout << (*i).x <<" "<<(*i).y << endl;
+            }
+        }
+		else
+		{
+			cout <<cpv.z<<endl;
+			break;
+		}
+    }
+	list<vertex>::iterator it1=vList.begin();
+	triangle t1;
+	t1.one = start;
+	advance(it1,1);
+	t1.two = *it;
+	advance(it1,1);
+	t1.three = *it;
+	tList.push_back(t1);
+}
 
 void mouse( int button, int state, int x, int y )
 { 
@@ -427,6 +470,7 @@ void keyboard( unsigned char key, int x, int y )
     }
     if ((key == 't' || key == 'T') && poly == true) {
         //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
+        tess(vList,tList);
     }
     if ((key == 'p' || key == 'P') && poly == true) {
         //polygons filled in after tesselation
