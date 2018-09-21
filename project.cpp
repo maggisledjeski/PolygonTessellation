@@ -106,9 +106,9 @@ void display( void )
    
     /* plot new point */
 
-        glBegin(GL_POINTS);
-            glVertex2fv(p); 
-        glEnd();
+    glBegin(GL_POINTS);
+    glVertex2fv(p); 
+    glEnd();
   
      
      glFlush(); /* clear buffers */
@@ -116,7 +116,7 @@ void display( void )
  }
 
 
-void drawBox( int x, int y )
+void drawBox( float x, float y )
 {
     typedef GLfloat point[2];     
     point p;
@@ -167,10 +167,10 @@ void drawLinSeg(vertex old_v, vertex new_v)
     {
     	old_v.x = new_v.x;
         old_v.y = new_v.y;
-    }
+	}
     glBegin(GL_LINE_LOOP);
-    glVertex2i(old_v.x,old_v.y);
-    glVertex2i(new_v.x,new_v.y);
+    glVertex2f(old_v.x,old_v.y);
+    glVertex2f(new_v.x,new_v.y);
     glEnd();
     glFlush();
 }
@@ -251,7 +251,10 @@ bool linIntersect(linseg a, linseg b)
     if(((0.0 < ua) && (ua < 1.0)) && (((0.0 < ub) && (ub < 1.0))))
     {
 		intersect = true;
-		cout << intersect << endl;
+		cout << a.one.x <<" "<<a.one.y<< endl;
+		cout << a.two.x << " " <<a.two.y <<endl;
+		cout << b.one.x <<" "<<b.one.y<< endl;
+        cout << b.two.x << " " <<b.two.y <<endl;
     }
     float x = a.one.x + ua*(a.two.x - a.one.x);
     float y = a.one.y + ua*(a.two.y - a.one.y);
@@ -259,73 +262,93 @@ bool linIntersect(linseg a, linseg b)
     
     return intersect;
 }
+
+void fillPoly(list <linseg> LList)
+{
+	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
+    {
+    	//cout << (*it).one.x << " " << (*it).one.y <<endl;
+		glClear(GL_COLOR_BUFFER_BIT);
+		glBegin(GL_POLYGON);
+		glVertex2f((*it).one.x,(*it).one.y);
+		glEnd();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glFlush();
+    }
+
+}
+
+vertex cp(linseg a1, linseg b1)
+{
+    vertex v1,v2,v3,v4;
+    v1 = a1.one;
+    v2 = a1.two;
+    v3 = b1.one;
+    v4 = b1.two;
+	//create the points, (x1-x2,y1-y2,0) (x4-x2,y4-y2,0) v2 = v3
+	vertex a,b;
+	a.x = v1.x - v2.x;
+	a.y = v1.y - v2.y;
+	a.z = 0.0;
+	b.x = v4.x - v2.x;
+	b.y = v4.y - v2.y;
+	b.z = 0.0;
+	//create the cp vertex
+	float x = (a.y*b.z) - (a.z*b.y);
+	float y = (b.z*a.x) - (b.x*a.z);
+	float z = (a.x*b.y) - (a.y*b.x);
+	vertex cpv;
+    cpv.x = x;
+    cpv.y = y;
+    cpv.z = z;
+    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
+    return cpv;
+}
+
 void mouse( int button, int state, int x, int y )
 { 
-
-  if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
-     {
-        //printf ("%d   %d\n", x, y); //prints the mouse coordinates
-	if(poly == false){
-	vertex prev_v = *prev(vList.end());
-	vertex v;
-	v.x = x;
-	v.y = WINDOW_MAX_Y -y;
-	vList.push_back(v); //stores the screen coordinates
-	//lList.push_back(v);
-	printf("v: %d   %d\n", v.x,v.y);
-	linseg l;
-	linseg prev_l = *prev(LList.end());
-	l.one = prev_v;
-	l.two = v;
-	bool ib1=false,ib2=false;
-	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); ++it)
-	{
-		ib1 = linIntersect(l,*it);
-		//there is an intersect present with the current linseg and the one being tested and resets the bool
-		if(ib1 == true)
+	if ( button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN )
+  	{
+        //tests if the polygon is not built and there is at least one vertex built
+		if(poly == false && vList.size() > 0)
 		{
-			cout << "there is an intersect with the last linseg drawn." << endl;
-			ib1 = false;
-		}
+			vertex prev_v = *prev(vList.end());
+			vertex v;
+			v.x = x;
+			v.y = WINDOW_MAX_Y -y;
+			vList.push_back(v); //stores the screen coordinates
+			//lList.push_back(v);
+			printf("v: %d   %d\n", v.x,v.y);
+			linseg l;
+			linseg prev_l = *prev(LList.end());
+			l.one = prev_v;
+			l.two = v;
+			bool ib1=false;
+			for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
+			{
+				ib1 = linIntersect(l,*it);
+				//there is an intersect present with the current linseg and the one being tested and resets the bool
+				if(ib1 == true)
+				{
+					cout << "there is an intersect with the last linseg drawn." << endl;
+					ib1 = false;
+				}
 		
-	}
-	if(ib2 == false)
-	{
-		LList.push_back(l);
-	}
-	//printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
-        //printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
-	drawLinSeg(prev_v,v);
-	Determinant2(prev_v,v);
-	drawBox( x, WINDOW_MAX_Y -y );	
-	}
-	/*if(lList.size() == 2)
-	{
-		//adds lList vertices to the linseg l, which is added to the LList <linseg>
-		linseg l;
-		l.one = lList.front();
-		l.two = lList.back();
-		printf("l1: %d     %d\n", l.one.x,l.one.y);
-                printf("l2: %d     %d\n\n",l.two.x,l.two.y);
-		lList.pop_back();
-		lList.pop_back();
-		if(lList.empty())
+			}
+			LList.push_back(l);
+			Determinant2(prev_v,v);
+			drawBox( x, WINDOW_MAX_Y -y );
+			drawLinSeg(prev_v,v);	
+		} else if(poly == false && vList.size() == 0)	//tests if the polygon is not built and no vertex has been built
 		{
-			printf("list <vertex> lList is empty!\n");
+			vertex v;
+            v.x = x;
+            v.y = WINDOW_MAX_Y -y;
+            vList.push_back(v);
 		}
-		//adds the linseg l to the end of the LList
-		LList.push_back(l);
-		printf("L1: %d     %d\n", LList.back().one.x,LList.back().one.y);
-                printf("L2: %d     %d\n\n",LList.back().two.x,LList.back().two.y);
-		
-		//calculate the equations for the line, send to equation list?
-		//does the line interect any other lines?
-		//draw the line
-		
-		drawLinSeg(LList.back().one.x,LList.back().two.x,LList.back().one.y,LList.back().two.y);
-	}*/
-        //drawBox( x, WINDOW_MAX_Y -y );
-     }
+		//drawLinSeg(prev_v,v);
+		//drawBox( x, WINDOW_MAX_Y -y );
+    }
 
   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
      {
@@ -348,8 +371,9 @@ void keyboard( unsigned char key, int x, int y )
     if (key == 'q' || key == 'Q') {
 	exit(0);
     }
-    if (key == 'f' || key == 'F') {
+    if (key == 'f' || key == 'F' && poly == true) {
         //draw polygon filled in with no tesselation
+        fillPoly(LList);
     }
     if (key == 't' || key == 'T') {
         //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
