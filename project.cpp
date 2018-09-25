@@ -203,6 +203,8 @@ float Determinant2(vertex a, vertex b)
     return d;
 }
 
+
+
 void CP2(bool poly, list <linseg> LList)
 {
     if(poly == true)
@@ -216,8 +218,6 @@ void CP2(bool poly, list <linseg> LList)
         printf("the polygon is not finished, left click on window to finsh the polygon");
     }
 }
-
-
 bool linIntersect(linseg a, linseg b)
 {
     bool intersect = false;
@@ -348,6 +348,9 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
     return cpv;
 }
+
+
+
 void tess(list <vertex> vList,list <triangle> tList)                                    
 {
 	//counts the number of cw vertices to keep track of where the start vertex should be
@@ -384,32 +387,55 @@ void tess(list <vertex> vList,list <triangle> tList)
         {
             cout <<"ccw"<<endl;
             
-			//draws the tess line
-			glBegin(GL_LINES);
-			glVertex2f(start.x,start.y);
-			glVertex2f(b.x,b.y);
-			glEnd();
-			glFlush();
+			//create linseg for tess line can see if any intersect
+			linseg tess;
+			tess.one = start;
+			tess.two = b;
 
-			//adds to tList
-			triangle t;
-			t.one = start;
-			t.two = a;
-			t.three = b;
-            tList.push_back(t);
-
-			//creates the vertex to delete from vList, and removes it
-			vertex c = *prev(itn);
-            cout <<"removed: "<< c.x << " "<< c.y<< endl;
-            vList.erase(prev(itn));
-
-			//prints the rest of vList after removal
-            for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+			bool ib=false;
+            for(list<linseg>::iterator t1=LList.begin(); t1!=LList.end(); t1++)
             {
-                cout << (*i).x <<" "<<(*i).y << endl;
+                ib = linIntersect(tess,*t1);
+                //there is an intersect present with the tess linseg and the one being tested
+                if(ib == true)
+                {
+                	cout << "there is an intersect with the tess linseg." << endl;
+					cwCount++;
+					break;	//breaks the for loop, moves the start by 1, goes to start of while
+                }
             }
+			
+			if(ib == false)	//if there are no tess line intersections
+			{
+				//call degree check
+				
+				//draws the tess line
+				glBegin(GL_LINES);
+				glVertex2f(start.x,start.y);
+				glVertex2f(b.x,b.y);
+				glEnd();
+				glFlush();
+				
+				//adds to tList
+				triangle t;
+				t.one = start;
+				t.two = a;
+				t.three = b;
+            	tList.push_back(t);
+				
+				//creates the vertex to delete from vList, and removes it
+				vertex c = *prev(itn);
+            	cout <<"removed: "<< c.x << " "<< c.y<< endl;
+            	vList.erase(prev(itn));
+
+				//prints the rest of vList after removal
+            	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+            	{
+                	cout << (*i).x <<" "<<(*i).y << endl;
+            	}
+			}
         }
-		else
+		else	//cw
 		{
 			
 			cout <<cpv.z<<endl;
