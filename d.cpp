@@ -132,61 +132,46 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     return cpv;
 }
 
-bool AngleCheck(linseg tess, linseg l1, linseg l2)
+bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//linseg tess, linseg l1, linseg l2)
 {
 	bool interior = true;
-	vertex a,b,c,d,e,f;
+	/*vertex a,b,c,d,e,f;
 	a = tess.one;
 	b = tess.two;
 	c = l1.one;
 	d = l1.two;
 	e = l2.one;
-	f = l2.two;
+	f = l2.two;*/
 
-	//calculate alpha
-	//create the vector points b = c
-	vertex v1,v2;
-    v1.x = a.x - b.x;
+	vertex v1,v2,v3;
+	v1.x = a.x - b.x;
     v1.y = a.y - b.y;
     v2.x = c.x - d.x;
     v2.y = c.y - d.y;
+    v3.x = e.x - f.x;
+    v3.y = e.y - f.y;
 	
 	//cout << "v1: "<<v1.x << " " << v1.y << endl;
 	//cout << "v2: " <<v2.x << " " << v2.y << endl;
 
 	float dp1 = v1.x*v2.x;
-	float dp2 = v1.y*v2.y;
-	float dp = dp1 + dp2;
-	//cout << dp << endl;
+    float dp2 = v1.y*v2.y;
+    float dpa = dp1 + dp2;
+
+	float dp3 = v2.x*v3.x;
+    float dp4 = v2.y*v3.y;
+    float dpb = dp3 + dp4;
 	
-	//calculate magnitude of v1, v2
 	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
-	float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
-	
-	//cout << v1m << " " << v2m << endl;
-	//calculate alpha
-	float alpha = acos((dp/(v1m*v2m))) * 180.0/PI;
-	cout << "alpha: "<<alpha << endl;
-	
-	//create the vector points
-	vertex v3,v4;
-    v3.x = c.x - d.x;
-    v3.y = c.y - d.y;
-    v4.x = e.x - f.x;
-    v4.y = e.y - f.y;
-
-	//cout << "v3: "<<v3.x << " " << v3.y << endl;
-    //cout << "v4: "<<v4.x << " " << v4.y << endl;
-
-    float dp3 = v3.x*v4.x;
-    float dp4 = v3.y*v4.y;
-    float dp5 = dp3 + dp4;
-    //cout << dp5 << endl;
+    float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
 
 	float v3m = sqrt((pow(v3.x,2.0))+(pow(v3.y,2.0)));
-    float v4m = sqrt((pow(v4.x,2.0))+(pow(v4.y,2.0)));
-	float beta = acos((dp5/(v3m*v4m))) * 180.0/PI;
-    cout << "beta: "<<beta << endl;
+    //float v4m = sqrt((pow(v4.x,2.0))+(pow(v4.y,2.0)));
+
+	float alpha = acos((dpa/(v1m*v2m))) * 180.0/PI;
+    float beta = acos((dpb/(v2m*v3m))) * 180.0/PI;
+    cout << "alpha: " << alpha << endl;
+	cout << "beta: " << beta << endl;
 	
 	if(alpha > beta)
 	{
@@ -270,7 +255,7 @@ int main(int argc, char** argv)
 	d.one = v6;
 	d.two = v7;
 	
-	bool h = AngleCheck(a,b,c);
+	bool h = AngleCheck(v1,v2,v3,v4,v5,v6);
 	cout << h << endl;
 	/*vList.push_back(v5);
 	vList.push_back(v6);
