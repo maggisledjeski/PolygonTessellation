@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <iostream> 
 #include <list> 
+#include <math.h>
+#define PI 3.14159265358979
 using namespace std;
 // These are defined in a global scope
 
@@ -349,7 +351,59 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     return cpv;
 }
 
+bool AngleCheck(linseg tess, linseg l1, linseg l2)
+{
+    bool interior = true;
+    vertex a,b,c,d,e,f;
+    a = tess.one;
+    b = tess.two;
+    c = l1.one;
+    d = l1.two;
+    e = l2.one;
+    f = l2.two;
 
+	//calculate the vectors v2 = v3
+	vertex v1,v2,v3,v4;
+    v1.x = a.x - b.x;
+    v1.y = a.y - b.y;
+    v2.x = c.x - d.x;
+    v2.y = c.y - d.y;
+
+	v3.x = c.x - d.x;
+    v3.y = c.y - d.y;
+    v4.x = e.x - f.x;
+    v4.y = e.y - f.y;
+	
+	//calculate the dot product for alpha and beta
+	float dp1 = v1.x*v2.x;
+    float dp2 = v1.y*v2.y;
+    float dpa = dp1 + dp2;
+
+	float dp3 = v3.x*v4.x;
+    float dp4 = v3.y*v4.y;
+    float dpb = dp3 + dp4;
+
+	//calculate the magnitude for each vector
+	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
+    float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
+
+	float v3m = sqrt((pow(v3.x,2.0))+(pow(v3.y,2.0)));
+    float v4m = sqrt((pow(v4.x,2.0))+(pow(v4.y,2.0)));
+
+	//calculate alpha and beta
+	float alpha = acos((dpa/(v1m*v2m))) * 180.0/PI;
+    float beta = acos((dpb/(v3m*v4m))) * 180.0/PI;
+    cout << "alpha: " << alpha << endl;
+	cout << "beta: " << beta << endl;
+
+	//return false if the angle is not interior	
+	if(alpha > beta)
+    {
+        interior = false;
+    }
+
+    return interior;
+}	
 
 void tess(list <vertex> vList,list <triangle> tList)                                    
 {
@@ -404,11 +458,9 @@ void tess(list <vertex> vList,list <triangle> tList)
 					break;	//breaks the for loop, moves the start by 1, goes to start of while
                 }
             }
-			
-			if(ib == false)	//if there are no tess line intersections
-			{
-				//call degree check
-				
+			//bool intAngle = AngleCheck(tess);
+			if(ib == false && )	//if there are no tess line intersections
+			{					
 				//draws the tess line
 				glBegin(GL_LINES);
 				glVertex2f(start.x,start.y);
@@ -443,14 +495,14 @@ void tess(list <vertex> vList,list <triangle> tList)
 		}
     }
 	//will need to fix, code for when the last triangle is added
-	list<vertex>::iterator it1=vList.begin();
+	/*list<vertex>::iterator it1=vList.begin();
 	triangle t1;
 	t1.one = start;
 	advance(it1,1);
 	t1.two = *it1;
 	advance(it1,1);
 	t1.three = *it1;
-	tList.push_back(t1);
+	tList.push_back(t1);*/
 }
 
 void mouse( int button, int state, int x, int y )

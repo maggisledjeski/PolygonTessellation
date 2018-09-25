@@ -132,8 +132,9 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     return cpv;
 }
 
-bool degreeCheck(linseg tess, linseg l1, linseg l2)
+bool AngleCheck(linseg tess, linseg l1, linseg l2)
 {
+	bool interior = true;
 	vertex a,b,c,d,e,f;
 	a = tess.one;
 	b = tess.two;
@@ -150,21 +151,49 @@ bool degreeCheck(linseg tess, linseg l1, linseg l2)
     v2.x = c.x - d.x;
     v2.y = c.y - d.y;
 	
-	cout << v1.x << " " << v1.y << endl;
-	cout << v2.x << " " << v2.y << endl;
+	//cout << "v1: "<<v1.x << " " << v1.y << endl;
+	//cout << "v2: " <<v2.x << " " << v2.y << endl;
 
 	float dp1 = v1.x*v2.x;
 	float dp2 = v1.y*v2.y;
 	float dp = dp1 + dp2;
-	cout << dp << endl;
+	//cout << dp << endl;
 	
 	//calculate magnitude of v1, v2
 	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
 	float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
 	
+	//cout << v1m << " " << v2m << endl;
+	//calculate alpha
 	float alpha = acos((dp/(v1m*v2m))) * 180.0/PI;
-	cout << alpha << endl;
+	cout << "alpha: "<<alpha << endl;
 	
+	//create the vector points
+	vertex v3,v4;
+    v3.x = c.x - d.x;
+    v3.y = c.y - d.y;
+    v4.x = e.x - f.x;
+    v4.y = e.y - f.y;
+
+	//cout << "v3: "<<v3.x << " " << v3.y << endl;
+    //cout << "v4: "<<v4.x << " " << v4.y << endl;
+
+    float dp3 = v3.x*v4.x;
+    float dp4 = v3.y*v4.y;
+    float dp5 = dp3 + dp4;
+    //cout << dp5 << endl;
+
+	float v3m = sqrt((pow(v3.x,2.0))+(pow(v3.y,2.0)));
+    float v4m = sqrt((pow(v4.x,2.0))+(pow(v4.y,2.0)));
+	float beta = acos((dp5/(v3m*v4m))) * 180.0/PI;
+    cout << "beta: "<<beta << endl;
+	
+	if(alpha > beta)
+	{
+		interior = false;
+	}
+	
+	return interior;
 }
 
 void tesselate(list <vertex> vList)
@@ -201,29 +230,31 @@ void tesselate(list <vertex> vList)
 
 int main(int argc, char** argv)
 {
+	//linseg a/tess line
 	vertex v1;
-	v1.x = -7.0;
-	v1.y = -1.0;
+	v1.x = 0.0;
+	v1.y = 0.0;
 	v1.z = 0.0;
-
 	vertex v2;
-	v2.x = 8.0;
-	v2.y = 3.0;
+	v2.x = -10.0;
+	v2.y = 20.0;
 	v2.z = 0.0;
 
-	vertex v3; //same as v2 because they are connected
+	//linseg b
+	vertex v3; 
     v3.x = 8.0;
-    v3.y = 3.0;
-
+    v3.y = 10.0;
     vertex v4;
-    v4.x = -1.0;
-    v4.y = -2.0;
+    v4.x = -10.0;
+    v4.y = 20.0;
 	
+	//linseg c
 	vertex v5,v6,v7,v8;
-	v5.x = 0.0;
-	v5.y = 0.0;
-	v6.x = 2.0;
-	v6.y = 2.0;
+	v5.x = -10.0;
+	v5.y = 20.0;
+	v6.x = -10.0;
+	v6.y = 0.0;
+
 	v7.x = 0.0;
 	v7.y = 4.0;
 	v8.x = 1.0;
@@ -239,8 +270,8 @@ int main(int argc, char** argv)
 	d.one = v6;
 	d.two = v7;
 	
-	degreeCheck(a,b,c);
-	
+	bool h = AngleCheck(a,b,c);
+	cout << h << endl;
 	/*vList.push_back(v5);
 	vList.push_back(v6);
 	vList.push_back(v7);
