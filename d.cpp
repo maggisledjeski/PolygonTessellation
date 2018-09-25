@@ -130,12 +130,25 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     return cpv;
 }
 
+bool degreeCheck(linseg tess, linseg l1, linseg l2)
+{
+	vertex a,b,c,d,e,f;
+	a = tess.one;
+	b = tess.two;
+	c = l1.one;
+	d = l1.two;
+	e = l2.one;
+	f = l2.two;
+
+	//calculate alpha 
+}
+
 void tesselate(list <vertex> vList)
 {
 	vertex start = vList.front();
 	list<vertex>::iterator it=vList.begin(); 
-	//while(vList.size() > 0)
-    //{
+	while(vList.size() > 3)
+    {
         vertex a,b;
 		advance(it,1);
 		a = *it;
@@ -146,18 +159,20 @@ void tesselate(list <vertex> vList)
 		{
 			cout <<"ccw"<<endl;
 			//vList.remove((*it));
-		//cout<<*prev((*it).x)<<" " << *prev((*it).y)<<endl;
-		//cout << b.x << " "<< b.y<<endl;
-		vertex c = *prev(it);
-		cout <<"removed: "<< c.x << " "<< c.y<< endl;
-		vList.erase(prev(it));
-		//vList.remove(a.y);
-		for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
-		{
-			cout << (*i).x <<" "<<(*i).y << endl;
+			//cout<<*prev((*it).x)<<" " << *prev((*it).y)<<endl;
+			//cout << b.x << " "<< b.y<<endl;
+			vertex c = *prev(it);
+			cout <<"removed: "<< c.x << " "<< c.y<< endl;
+			vList.erase(prev(it));
+			//vList.remove(a.y);
+			for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+			{
+				cout << (*i).x <<" "<<(*i).y << endl;
+			}
 		}
-		}
-    //}
+    }
+    //draw and add last triangle to list and screen
+    
 }
 
 int main(int argc, char** argv)
@@ -180,14 +195,15 @@ int main(int argc, char** argv)
     v4.x = -1.0;
     v4.y = -2.0;
 	
-	vertex v5,v6,v7;
+	vertex v5,v6,v7,v8;
 	v5.x = 0.0;
 	v5.y = 0.0;
 	v6.x = 2.0;
 	v6.y = 2.0;
 	v7.x = 0.0;
 	v7.y = 4.0;
-
+	v8.x = 1.0;
+	v8.y = 2.0;
 	linseg a,b,c,d;
 	a.one = v1;
 	a.two = v2;
@@ -201,6 +217,7 @@ int main(int argc, char** argv)
 	vList.push_back(v5);
 	vList.push_back(v6);
 	vList.push_back(v7);
+	vList.push_back(v8);
 	tesselate(vList);
 
     /*linIntersect(a,b);	
