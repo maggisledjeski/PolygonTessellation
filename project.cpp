@@ -350,33 +350,60 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
 }
 void tess(list <vertex> vList,list <triangle> tList)                                    
 {
-    vertex start = vList.front();
-    list<vertex>::iterator it=vList.begin();
+	//counts the number of cw vertices to keep track of where the start vertex should be
+    int cwCount = 0;
     while(vList.size() > 3)
     {
-        vertex a,b;
-        advance(it,1);
-        a = *it;
-        advance(it,1);
-        b = *it;
+        list<vertex>::iterator its = vList.begin();	//keeps track of the starting vertex
+		vertex start = vList.front();	//first vertex in vList
+		list<vertex>::iterator itn = vList.begin();	//keeps track of the next vertices
+				
+		//stores the next 2 vertices from the start in vList to a and b
+		vertex a,b;
+        if(cwCount > 0)	//handles the number of cw vertices
+		{
+			advance(its,cwCount);	//advances its to new start
+			start = *its;
+			advance(itn,cwCount+1);	//advances itn to the next element after the start
+        	a = *itn;
+        	advance(itn,1);			//advances itn to the next element after a
+        	b = *itn;
+		} else 
+		{
+			advance(itn,1);	//advances itn to the next element after the start
+        	a = *itn;
+        	advance(itn,1);	//advances itn to the next element after a
+        	b = *itn;
+		}
+		
+		//calculates the cross product for the given vertices
         vertex cpv = cp1(start,a,b);
+		
+		//tests ccw or cw
         if(cpv.z < 0.0)
         {
             cout <<"ccw"<<endl;
-            //drawLinSeg(start,b);
+            
+			//draws the tess line
 			glBegin(GL_LINES);
 			glVertex2f(start.x,start.y);
 			glVertex2f(b.x,b.y);
 			glEnd();
 			glFlush();
+
+			//adds to tList
 			triangle t;
 			t.one = start;
 			t.two = a;
 			t.three = b;
             tList.push_back(t);
-			vertex c = *prev(it);
+
+			//creates the vertex to delete from vList, and removes it
+			vertex c = *prev(itn);
             cout <<"removed: "<< c.x << " "<< c.y<< endl;
-            vList.erase(prev(it));
+            vList.erase(prev(itn));
+
+			//prints the rest of vList after removal
             for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
             {
                 cout << (*i).x <<" "<<(*i).y << endl;
@@ -384,17 +411,19 @@ void tess(list <vertex> vList,list <triangle> tList)
         }
 		else
 		{
+			
 			cout <<cpv.z<<endl;
 			break;
 		}
     }
+	//will need to fix, code for when the last triangle is added
 	list<vertex>::iterator it1=vList.begin();
 	triangle t1;
 	t1.one = start;
 	advance(it1,1);
-	t1.two = *it;
+	t1.two = *it1;
 	advance(it1,1);
-	t1.three = *it;
+	t1.three = *it1;
 	tList.push_back(t1);
 }
 
