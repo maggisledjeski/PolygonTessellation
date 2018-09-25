@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <list>
+#include <math.h>
+#define PI 3.14159265358979
 using namespace std;
 
 bool ccwb;
@@ -140,7 +142,29 @@ bool degreeCheck(linseg tess, linseg l1, linseg l2)
 	e = l2.one;
 	f = l2.two;
 
-	//calculate alpha 
+	//calculate alpha
+	//create the vector points b = c
+	vertex v1,v2;
+    v1.x = a.x - b.x;
+    v1.y = a.y - b.y;
+    v2.x = c.x - d.x;
+    v2.y = c.y - d.y;
+	
+	cout << v1.x << " " << v1.y << endl;
+	cout << v2.x << " " << v2.y << endl;
+
+	float dp1 = v1.x*v2.x;
+	float dp2 = v1.y*v2.y;
+	float dp = dp1 + dp2;
+	cout << dp << endl;
+	
+	//calculate magnitude of v1, v2
+	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
+	float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
+	
+	float alpha = acos((dp/(v1m*v2m))) * 180.0/PI;
+	cout << alpha << endl;
+	
 }
 
 void tesselate(list <vertex> vList)
@@ -187,9 +211,9 @@ int main(int argc, char** argv)
 	v2.y = 3.0;
 	v2.z = 0.0;
 
-	vertex v3;
-    v3.x = -2.0;
-    v3.y = 1.0;
+	vertex v3; //same as v2 because they are connected
+    v3.x = 8.0;
+    v3.y = 3.0;
 
     vertex v4;
     v4.x = -1.0;
@@ -211,16 +235,19 @@ int main(int argc, char** argv)
 	b.two = v4;
 	c.one = v5;
 	c.two = v6;
+	
 	d.one = v6;
 	d.two = v7;
 	
-	vList.push_back(v5);
+	degreeCheck(a,b,c);
+	
+	/*vList.push_back(v5);
 	vList.push_back(v6);
 	vList.push_back(v7);
 	vList.push_back(v8);
 	tesselate(vList);
 
-    /*linIntersect(a,b);	
+    linIntersect(a,b);	
 	//vertex cpv = cp(c,d);	
 	vertex cpv = cp1(v5,v6,v7);
 	float z = cpv.z;
