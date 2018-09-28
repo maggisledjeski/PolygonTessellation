@@ -144,16 +144,16 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 	f = l2.two;*/
 
 	vertex v1,v2,v3;
-	v1.x = a.x - b.x;
-    v1.y = a.y - b.y;
-    v2.x = c.x - d.x;
-    v2.y = c.y - d.y;
-    v3.x = e.x - f.x;
-    v3.y = e.y - f.y;
+	v1.x = b.x - a.x;
+    v1.y = b.y - a.y;
+    v2.x = d.x - c.x;
+    v2.y = d.y - c.y;
+    v3.x = f.x - e.x;
+    v3.y = f.y - e.y;
 	
-	//cout << "v1: "<<v1.x << " " << v1.y << endl;
-	//cout << "v2: " <<v2.x << " " << v2.y << endl;
-
+	cout << "v1: "<<v1.x << " " << v1.y << endl;
+	cout << "v2: " <<v2.x << " " << v2.y << endl;
+	cout << "v3: "<<v3.x << " " <<v3.y<<endl;
 	float dp1 = v1.x*v2.x;
     float dp2 = v1.y*v2.y;
     float dpa = dp1 + dp2;
@@ -161,7 +161,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 	float dp3 = v2.x*v3.x;
     float dp4 = v2.y*v3.y;
     float dpb = dp3 + dp4;
-	
+	cout <<dpb<<endl;
 	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
     float v2m = sqrt((pow(v2.x,2.0))+(pow(v2.y,2.0)));
 
@@ -184,7 +184,12 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 void tesselate(list <vertex> vList)
 {
 	vertex start = vList.front();
-	list<vertex>::iterator it=vList.begin(); 
+	list<vertex>::iterator it=vList.begin();
+	cout << "vList before:"<<endl; 
+	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+            {
+                cout << (*i).x <<" "<<(*i).y << endl;
+            }
 	while(vList.size() > 3)
     {
         vertex a,b;
@@ -192,16 +197,21 @@ void tesselate(list <vertex> vList)
 		a = *it;
 		advance(it,1);
 		b = *it;
+		advance(it,1);
+		vertex d = *it;
 		vertex cpv = cp1(start,a,b);
+		bool w = AngleCheck(start,b,a,b,b,d);
+		cout << w<<endl;
         if(cpv.z < 0.0)
 		{
 			cout <<"ccw"<<endl;
 			//vList.remove((*it));
 			//cout<<*prev((*it).x)<<" " << *prev((*it).y)<<endl;
 			//cout << b.x << " "<< b.y<<endl;
-			vertex c = *prev(it);
+			vertex c = *prev(prev(it));
 			cout <<"removed: "<< c.x << " "<< c.y<< endl;
-			vList.erase(prev(it));
+			vList.erase(prev(prev(it)));
+			cout << "vList contains:"<<endl;
 			//vList.remove(a.y);
 			for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
 			{
@@ -241,7 +251,7 @@ int main(int argc, char** argv)
 	v6.y = 0.0;
 
 	v7.x = 0.0;
-	v7.y = 4.0;
+	v7.y = 0.0;
 	v8.x = 1.0;
 	v8.y = 2.0;
 	linseg a,b,c,d;
@@ -255,15 +265,15 @@ int main(int argc, char** argv)
 	d.one = v6;
 	d.two = v7;
 	
-	bool h = AngleCheck(v1,v2,v3,v4,v5,v6);
-	cout << h << endl;
-	/*vList.push_back(v5);
+	//bool h = AngleCheck(v1,v2,v3,v2,v2,v6);
+	//cout << h << endl;
+	vList.push_back(v1);
+	vList.push_back(v3);
+	vList.push_back(v5);
 	vList.push_back(v6);
-	vList.push_back(v7);
-	vList.push_back(v8);
 	tesselate(vList);
 
-    linIntersect(a,b);	
+    /*linIntersect(a,b);	
 	//vertex cpv = cp(c,d);	
 	vertex cpv = cp1(v5,v6,v7);
 	float z = cpv.z;

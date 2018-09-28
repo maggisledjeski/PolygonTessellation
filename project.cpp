@@ -124,8 +124,8 @@ void drawBox( float x, float y )
  
     glColor3ub( red, green, blue );
    
-    p[0] = x;
-    p[1] = y;  
+    //p[0] = x;
+    //p[1] = y;  
     
         glBegin(GL_POINTS);
             glVertex2fv(p); 
@@ -357,13 +357,15 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
     
 	//calculate the vectors 
 	vertex v1,v2,v3;
-    v1.x = a.x - b.x;
-    v1.y = a.y - b.y;
-    v2.x = c.x - d.x;
-    v2.y = c.y - d.y;
-    v3.x = e.x - f.x;
-    v3.y = e.y - f.y;
-	
+    v1.x = b.x - a.x;
+    v1.y = b.y - a.y;
+    v2.x = d.x - c.x;
+    v2.y = d.y - c.y;
+    v3.x = f.x - e.x;
+    v3.y = f.y - e.y;
+	cout << "v1: "<<v1.x <<" "<<v1.y << endl;
+	cout << "v2: "<<v2.x <<" "<<v2.y << endl;
+	cout << "v3: "<<v3.x <<" "<<v3.y << endl;
 	//calculate the dot product for alpha and beta
 	float dp1 = v1.x*v2.x;
     float dp2 = v1.y*v2.y;
@@ -379,8 +381,8 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 	float v3m = sqrt((pow(v3.x,2.0))+(pow(v3.y,2.0)));
 
 	//calculate alpha and beta
-	float alpha = acos((dpa/(v1m*v2m))) * 180.0/PI;
-    float beta = acos((dpb/(v2m*v3m))) * 180.0/PI;
+	float alpha = acos((dpa/(v1m*v2m)));// * 180.0/PI;
+    float beta = acos((dpb/(v2m*v3m)));// * 180.0/PI;
     cout << "alpha: " << alpha << endl;
 	cout << "beta: " << beta << endl;
 
@@ -395,8 +397,14 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 
 void tess(list <vertex> vList,list <triangle> tList)                                    
 {
+	cout<<"vList:"<<endl;
+	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+    {
+    	cout << (*i).x <<" "<<(*i).y << endl;
+    }
 	//counts the number of cw vertices to keep track of where the start vertex should be
     int cwCount = 0;
+	int count = 0;
     while(vList.size() > 3)
     {
         list<vertex>::iterator its = vList.begin();	//keeps track of the starting vertex
@@ -423,9 +431,8 @@ void tess(list <vertex> vList,list <triangle> tList)
 		
 		//calculates the cross product for the given vertices
         vertex cpv = cp1(start,a,b);
-		
 		//tests ccw or cw
-        if(cpv.z < 0.0)
+        if(cpv.z < 0.0 && count < 8)
         {
             cout <<"ccw"<<endl;
             
@@ -446,8 +453,10 @@ void tess(list <vertex> vList,list <triangle> tList)
 					break;	//breaks the for loop, moves the start by 1, goes to start of while
                 }
             }
-			//bool intAngle = AngleCheck(tess);
-			if(ib == false && )	//if there are no tess line intersections
+			advance(itn,1);
+			vertex c = *itn;
+			bool intAngle = AngleCheck(start,b,a,b,b,c);
+			if(ib == false && intAngle == true && count < 8)	//if there are no tess line intersections
 			{					
 				//draws the tess line
 				glBegin(GL_LINES);
@@ -464,15 +473,16 @@ void tess(list <vertex> vList,list <triangle> tList)
             	tList.push_back(t);
 				
 				//creates the vertex to delete from vList, and removes it
-				vertex c = *prev(itn);
-            	cout <<"removed: "<< c.x << " "<< c.y<< endl;
-            	vList.erase(prev(itn));
+				vertex d = *prev(prev(itn));
+            	cout <<"removed: "<< d.x << " "<< d.y<< endl;
+            	vList.erase(prev(prev(itn)));
 
 				//prints the rest of vList after removal
             	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
             	{
                 	cout << (*i).x <<" "<<(*i).y << endl;
             	}
+				count++;
 			}
         }
 		else	//cw
@@ -506,7 +516,7 @@ void mouse( int button, int state, int x, int y )
 			v.y = WINDOW_MAX_Y -y;
 			vList.push_back(v); //stores the screen coordinates
 			//lList.push_back(v);
-			printf("v: %d   %d\n", v.x,v.y);
+			printf("v: %d   %d\n", x,y);
 			linseg l;
 			linseg prev_l = *prev(LList.end());
 			l.one = prev_v;
@@ -529,6 +539,7 @@ void mouse( int button, int state, int x, int y )
 			drawLinSeg(prev_v,v);	
 		} else if(poly == false && vList.size() == 0)	//tests if the polygon is not built and no vertex has been built
 		{
+			printf("v: %d   %d\n", x,y);
 			vertex v;
             v.x = x;
             v.y = WINDOW_MAX_Y -y;
