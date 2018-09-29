@@ -24,9 +24,9 @@ struct linseg {
     //draw line equation
 };
 struct triangle {
-    vertex one;
-    vertex two;
-	vertex three;
+    vertex tone;
+    vertex ttwo;
+	vertex tthree;
 };
 list <linseg> LList;
 list <triangle> tList;
@@ -449,14 +449,14 @@ void tess(list <vertex> vList,list <triangle> tList)
                 if(ib == true)
                 {
                 	cout << "there is an intersect with the tess linseg." << endl;
-					cwCount++;
+					//cwCount++;
 					break;	//breaks the for loop, moves the start by 1, goes to start of while
                 }
             }
 			advance(itn,1);
 			vertex c = *itn;
 			bool intAngle = AngleCheck(start,b,a,b,b,c);
-			if(ib == false && intAngle == true && count < 8)	//if there are no tess line intersections
+			if(ib == false && intAngle == true)	//if there are no tess line intersections
 			{					
 				//draws the tess line
 				glBegin(GL_LINES);
@@ -465,15 +465,16 @@ void tess(list <vertex> vList,list <triangle> tList)
 				glEnd();
 				glFlush();
 				
-				//adds to tList
+                //adds to tList
 				triangle t;
-				t.one = start;
-				t.two = a;
-				t.three = b;
+				t.tone = start;
+				t.ttwo = a;
+				t.tthree = b;
             	tList.push_back(t);
 				
 				//creates the vertex to delete from vList, and removes it
-				vertex d = *prev(prev(itn));
+				vertex d;
+                d = *prev(prev(itn));
             	cout <<"removed: "<< d.x << " "<< d.y<< endl;
             	vList.erase(prev(prev(itn)));
 
@@ -483,11 +484,14 @@ void tess(list <vertex> vList,list <triangle> tList)
                 	cout << (*i).x <<" "<<(*i).y << endl;
             	}
 				count++;
-			}
+			} else
+            {
+                cwCount++;
+            }
         }
 		else	//cw
 		{
-			
+			cwCount++;
 			cout <<cpv.z<<endl;
 			break;
 		}
@@ -495,12 +499,19 @@ void tess(list <vertex> vList,list <triangle> tList)
 	//will need to fix, code for when the last triangle is added
 	/*list<vertex>::iterator it1=vList.begin();
 	triangle t1;
-	t1.one = start;
+	t1.tone = *it1;
 	advance(it1,1);
-	t1.two = *it1;
+	t1.ttwo = *it1;
 	advance(it1,1);
-	t1.three = *it1;
+	t1.tthree = *it1;
 	tList.push_back(t1);*/
+    /*for(list<triangle>::iterator p=tList.begin(); p!=tList.end(); p++)
+    {
+        cout << "Triangle " << p << ": " << endl;
+        cout << (*p).one.x << " " << (*p).one.y << endl;
+        cout << (*p).two.x << " " << (*p).two.y << endl;
+        cout << (*p).three.x << " " << (*p).three.y << endl;
+    }*/
 }
 
 void mouse( int button, int state, int x, int y )
