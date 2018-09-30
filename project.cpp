@@ -11,44 +11,37 @@
 using namespace std;
 // These are defined in a global scope
 
-//list <vertex> vList;
-//global linked list of line segments
-//global linked list of triangles
 struct vertex {
     float x, y, z;
 };
 struct linseg {
     vertex one;
     vertex two;
-    //build line equation
-    //draw line equation
 };
 struct triangle {
     vertex tone;
     vertex ttwo;
 	vertex tthree;
 };
-list <linseg> LList;
-list <vertex> tList;
-list <vertex> vList;
-bool poly = false;
+list <linseg> LList;    //holds the line segments
+list <vertex> tList;    //holds the triangle vertices
+list <vertex> vList;    //holds the vertices in the order they are drawn
+bool poly = false;      //whether the polygon is finished or not
+
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
 // Specity the values to place and size the window on the screen
-
-const int WINDOW_POSITION_X = 100;
-const int WINDOW_POSITION_Y = 100;
-const int WINDOW_MAX_X = 400;
-const int WINDOW_MAX_Y = 400;
+const int WINDOW_POSITION_X = 800;
+const int WINDOW_POSITION_Y = 800;
+const int WINDOW_MAX_X = 800;
+const int WINDOW_MAX_Y = 800;
 
 // Specify the coordinate ranges for the world coordinates in the 2D Frame
-
 const float WORLD_COORDINATE_MIN_X = 0.0;
-const float WORLD_COORDINATE_MAX_X = 400.0;
+const float WORLD_COORDINATE_MAX_X = 800.0;
 const float WORLD_COORDINATE_MIN_Y = 0.0;
-const float WORLD_COORDINATE_MAX_Y = 400.0;
-
+const float WORLD_COORDINATE_MAX_Y = 800.0;
 
 void myglutInit( int argc, char** argv )
 {
@@ -56,15 +49,12 @@ void myglutInit( int argc, char** argv )
     glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB); /* default, not needed */
     glutInitWindowSize(WINDOW_MAX_X,WINDOW_MAX_Y); /* set pixel window */
     glutInitWindowPosition(WINDOW_POSITION_X, WINDOW_POSITION_Y); /* place window top left on display */
-    glutCreateWindow("Mouse and Keyboard Interaction"); /* window title */
+    glutCreateWindow("Polygon Tesselation"); /* window title */
 }
 
-
 void myInit(void)
-{
- 
+{ 
 /* standard OpenGL attributes */
-
       glClearColor(1.0, 1.0, 1.0, 1.0); /* white background */
       glColor3f(1.0, 0.0, 0.0); /* draw in red */
       glPointSize(1.0);
@@ -80,14 +70,11 @@ void myInit(void)
       glMatrixMode(GL_MODELVIEW);
 }
 
-
 void display( void )
 {
-
 /* define a point data type */
 
     typedef GLfloat point[2];     
-
     point p; /* A point in 2-D space */
 
     glClear(GL_COLOR_BUFFER_BIT);  /*clear the window */
@@ -110,12 +97,8 @@ void display( void )
     glBegin(GL_POINTS);
     glVertex2fv(p); 
     glEnd();
-  
-     
-     glFlush(); /* clear buffers */
-
- }
-
+    glFlush(); /* clear buffers */
+}
 
 void drawBox( float x, float y )
 {
@@ -127,40 +110,11 @@ void drawBox( float x, float y )
     //p[0] = x;
     //p[1] = y;  
     
-        glBegin(GL_POINTS);
-            glVertex2fv(p); 
-        glEnd();
-        glFlush();
+     glBegin(GL_POINTS);
+     glVertex2fv(p); 
+     glEnd();
+     glFlush();
 }
-
-/* //will need to add pointers to point to vectors
-float dP2 (vector a, vector b) //calculates the dot product for two vectors with 2 components each
-{
-    float s1 = a1*b1;
-    float s2 = a2*b2;
-    float dp2 = s1 + s2;
-    return dp2;
-}
-
-float dP3 (vector a, vector b) //calculates the dot product for two vectors with 3 components each
-{
-    float s1 = a1*b1;
-    float s2 = a2*b2;
-    float s3 = a3*b3;
-    float dp3 = s1 + s2 + s3;
-    return dp3;
-}
-*/
-
-/*void drawLinSeg(int x1, int x2, int y1, int y2)
-{
-    //connects lines to eachother but not to the previous line
-    glBegin(GL_LINE_LOOP);
-    glVertex2i(x1,y1);
-    glVertex2i(x2,y2);
-    glEnd();
-    glFlush();
-}*/
 
 void drawLinSeg(vertex old_v, vertex new_v)
 {
@@ -198,28 +152,6 @@ void clearBox()
        glFlush();
 }
 
-float Determinant2(vertex a, vertex b)
-{
-    float d = (a.x * b.y) - (a.y * b.x);
-//    printf("%f",d);
-    return d;
-}
-
-
-
-void CP2(bool poly, list <linseg> LList)
-{
-    if(poly == true)
-    {
-        //run
-        LList.front().one;
-        //LList
-    }
-    else
-    {
-        printf("the polygon is not finished, left click on window to finsh the polygon");
-    }
-}
 bool linIntersect(linseg a, linseg b)
 {
     bool intersect = false;
@@ -302,33 +234,6 @@ void returnPoly(list <linseg> LList)
 	drawLinSegList(LList);
 }
 
-vertex cp(linseg a1, linseg b1)
-{
-    vertex v1,v2,v3,v4;
-    v1 = a1.one;
-    v2 = a1.two;
-    v3 = b1.one;
-    v4 = b1.two;
-	//create the points, (x1-x2,y1-y2,0) (x4-x2,y4-y2,0) v2 = v3
-	vertex a,b;
-	a.x = v1.x - v2.x;
-	a.y = v1.y - v2.y;
-	a.z = 0.0;
-	b.x = v4.x - v2.x;
-	b.y = v4.y - v2.y;
-	b.z = 0.0;
-	//create the cp vertex
-	float x = (a.y*b.z) - (a.z*b.y);
-	float y = (b.z*a.x) - (b.x*a.z);
-	float z = (a.x*b.y) - (a.y*b.x);
-	vertex cpv;
-    cpv.x = x;
-    cpv.y = y;
-    cpv.z = z;
-    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
-    return cpv;
-}
-
 vertex cp1(vertex v1, vertex v2, vertex v3)
 {
     vertex a,b;
@@ -352,7 +257,7 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     return cpv;
 }
 
-bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//linseg tess, linseg l1, linseg l2)
+bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
 {
     bool interior = true;
     
@@ -367,14 +272,10 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 	cout << "v1: "<<v1.x <<" "<<v1.y << endl;
 	cout << "v2: "<<v2.x <<" "<<v2.y << endl;
 	cout << "v3: "<<v3.x <<" "<<v3.y << endl;
-	//calculate the dot product for alpha and beta
-	float dp1 = v1.x*v2.x;
-    float dp2 = v1.y*v2.y;
-    float dpa = dp1 + dp2;
 
-	float dp3 = v2.x*v3.x;
-    float dp4 = v2.y*v3.y;
-    float dpb = dp3 + dp4;
+	//calculate the dot product for alpha and beta
+	float dpa = (v1.x*v2.x) + (v1.y*v2.y);
+	float dpb = (v2.x*v3.x) + (v2.y*v3.y);
 
 	//calculate the magnitude for each vector
 	float v1m = sqrt((pow(v1.x,2.0))+(pow(v1.y,2.0)));
@@ -391,6 +292,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
 	if(alpha > beta)
     {
         interior = false;
+        cout << "angleCheck Failed" << endl;
     }
 
     return interior;
@@ -405,8 +307,9 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     	cout << (*i).x <<" "<<(*i).y << endl;
     }
 	//counts the number of cw vertices to keep track of where the start vertex should be
-    int cwCount = 0;
-	while(vList.size() > 3)
+    int Count = 0;
+	int intersectCount = 0;
+    while(vList.size() > 3)
     {
         list<vertex>::iterator its = vList.begin();	//keeps track of the starting vertex
 		vertex start = vList.front();	//first vertex in vList
@@ -415,23 +318,25 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 		list<vertex>::iterator itl = vList.begin();
 		//stores the next 2 vertices from the start in vList to a and b
 		vertex a,b,c;
-        if(cwCount > 0)	//handles the number of cw vertices
+        if(Count <= vList.size()-4)//2)	//handles the number of cw vertices
 		{
-			advance(its,cwCount);	//advances its to new start
+			advance(its,Count);	//advances its to new start
 			start = *its;
-			advance(itn,cwCount+1);	//advances itn to the next element after the start
+			advance(itn,Count+1);	//advances itn to the next element after the start
         	a = *itn;
-        	advance(itnn,cwCount+2);	//advances itn to the next element after a
+        	advance(itnn,Count+2);	//advances itn to the next element after a
         	b = *itnn;
-            advance(itl,cwCount+3);
+            advance(itl,Count+3);
             c = *itl;
 		} else 
 		{
-			advance(itn,1);	//advances itn to the next element after the start
+			advance(its,Count+1 - vList.size()+1);
+            start = *its;
+            advance(itn,Count+2 - vList.size()+1);	//advances itn to the next element after the start
         	a = *itn;
-        	advance(itnn,2);	//advances itn to the next element after a
+        	advance(itnn,Count+3 - vList.size()+1);	//advances itn to the next element after a
         	b = *itnn;
-            advance(itl,3);
+            advance(itl,Count+4 - vList.size()+1);
             c = *itl;
 		}
 		
@@ -486,25 +391,38 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 				
 			} else
             {
-                cout << "AngleCheck Fail" <<endl;
-                cwCount++;
-                if(cwCount >= vList.size())
+                cout << "AngleCheck Fail or tess line intersection fail" <<endl;
+                /*if(Count == vList.size())
                 {
-                    cwCount = 0;
+                    Count = 0;
                 }
-
+                else {
+                    Count++;
+                }*/
+                Count++;
+                cout << "cwCount (A): " << Count << endl;
             }
         }
 		else	//cw
 		{
-			cwCount++;
+			//cwCount++;
 			cout <<cpv.z<<endl;
-			if(cwCount > vList.size())
+			/*if(Count == vList.size())
             {
-                cwCount = 0;
+                Count = 0;
             }
-            break;
+            else {
+                Count++;
+            }*/
+            Count++;
+            //break;
+            cout << "cwCount: "<<Count << endl;
+            //break;
 		}
+        if(Count > 20)
+        {
+            break;
+        }
     }
 	//creates the last 3 vertices from vList
 	list<vertex>::iterator it1=vList.begin();
@@ -567,13 +485,12 @@ void mouse( int button, int state, int x, int y )
 				//there is an intersect present with the current linseg and the one being tested and resets the bool
 				if(ib1 == true)
 				{
-					cout << "there is an intersect with the last linseg drawn." << endl;
+					cout << "there is an intersect with the last line segment drawn." << endl;
 					ib1 = false;
 				}
 		
 			}
 			LList.push_back(l);
-			Determinant2(prev_v,v);
 			drawBox( x, WINDOW_MAX_Y -y );
 			drawLinSeg(prev_v,v);	
 		} else if(poly == false && vList.size() == 0)	//tests if the polygon is not built and no vertex has been built
