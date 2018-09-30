@@ -276,6 +276,7 @@ void fillPoly(list <linseg> LList)
 }
 void drawLinSegList(list <linseg> LList)
 {
+    glColor3f(1.0f,0.0f,0.0f);
     glBegin(GL_LINE_LOOP);
     for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
     {
@@ -395,9 +396,10 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
     return interior;
 }	
 
-void tess(list <vertex> vList,list <vertex> tList)                                    
+void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)                                    
 {
-	cout<<"vList:"<<endl;
+	drawLinSegList(LList);
+    cout<<"vList:"<<endl;
 	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
     {
     	cout << (*i).x <<" "<<(*i).y << endl;
@@ -588,9 +590,17 @@ void mouse( int button, int state, int x, int y )
 
   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
      {
-        printf ("%d   %d\n", x, y);
+        vertex last_v, start_v;
+        last_v = vList.back();
+        start_v = vList.front();
+        linseg last_l;
+        last_l.one = last_v;
+        last_l.two = start_v;
+        LList.push_back(last_l);
+        drawLinSeg(last_v,start_v);
+        //printf ("%d   %d\n", x, y);
         poly = true;
-	eraseBox( x, WINDOW_MAX_Y -y );
+	    eraseBox( x, WINDOW_MAX_Y -y );
      }
   
   if ( button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN )
@@ -613,7 +623,7 @@ void keyboard( unsigned char key, int x, int y )
     }
     if ((key == 't' || key == 'T') && poly == true) {
         //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
-        tess(vList,tList);
+        tess(vList,tList,LList);
     }
     if ((key == 'p' || key == 'P') && poly == true) {
         //polygons filled in after tesselation
