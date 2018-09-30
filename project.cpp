@@ -29,7 +29,7 @@ struct triangle {
 	vertex tthree;
 };
 list <linseg> LList;
-list <triangle> tList;
+list <vertex> tList;
 list <vertex> vList;
 bool poly = false;
 GLubyte red, green, blue;
@@ -248,10 +248,10 @@ bool linIntersect(linseg a, linseg b)
     if(((0.0 < ua) && (ua < 1.0)) && (((0.0 < ub) && (ub < 1.0))))
     {
 		intersect = true;
-		cout << a.one.x <<" "<<a.one.y<< endl;
+/*		cout << a.one.x <<" "<<a.one.y<< endl;
 		cout << a.two.x << " " <<a.two.y <<endl;
 		cout << b.one.x <<" "<<b.one.y<< endl;
-        cout << b.two.x << " " <<b.two.y <<endl;
+        cout << b.two.x << " " <<b.two.y <<endl;*/
     }
     float x = a.one.x + ua*(a.two.x - a.one.x);
     float y = a.one.y + ua*(a.two.y - a.one.y);
@@ -347,7 +347,7 @@ vertex cp1(vertex v1, vertex v2, vertex v3)
     cpv.x = x;
     cpv.y = y;
     cpv.z = z;
-    printf("x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
+    printf("cross product:     x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
     return cpv;
 }
 
@@ -395,7 +395,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)//lin
     return interior;
 }	
 
-void tess(list <vertex> vList,list <triangle> tList)                                    
+void tess(list <vertex> vList,list <vertex> tList)                                    
 {
 	cout<<"vList:"<<endl;
 	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
@@ -404,38 +404,40 @@ void tess(list <vertex> vList,list <triangle> tList)
     }
 	//counts the number of cw vertices to keep track of where the start vertex should be
     int cwCount = 0;
-	int count = 0;
-    while(vList.size() > 3)
+	while(vList.size() > 3)
     {
         list<vertex>::iterator its = vList.begin();	//keeps track of the starting vertex
 		vertex start = vList.front();	//first vertex in vList
 		list<vertex>::iterator itn = vList.begin();	//keeps track of the next vertices
-				
+        list<vertex>::iterator itnn = vList.begin();		
+		list<vertex>::iterator itl = vList.begin();
 		//stores the next 2 vertices from the start in vList to a and b
-		vertex a,b;
+		vertex a,b,c;
         if(cwCount > 0)	//handles the number of cw vertices
 		{
 			advance(its,cwCount);	//advances its to new start
 			start = *its;
 			advance(itn,cwCount+1);	//advances itn to the next element after the start
         	a = *itn;
-        	advance(itn,1);			//advances itn to the next element after a
-        	b = *itn;
+        	advance(itnn,cwCount+2);	//advances itn to the next element after a
+        	b = *itnn;
+            advance(itl,cwCount+3);
+            c = *itl;
 		} else 
 		{
 			advance(itn,1);	//advances itn to the next element after the start
         	a = *itn;
-        	advance(itn,1);	//advances itn to the next element after a
-        	b = *itn;
+        	advance(itnn,2);	//advances itn to the next element after a
+        	b = *itnn;
+            advance(itl,3);
+            c = *itl;
 		}
 		
 		//calculates the cross product for the given vertices
         vertex cpv = cp1(start,a,b);
 		//tests ccw or cw
-        if(cpv.z < 0.0 && count < 8)
-        {
-            cout <<"ccw"<<endl;
-            
+        if(cpv.z < 0.0)
+        {        
 			//create linseg for tess line can see if any intersect
 			linseg tess;
 			tess.one = start;
@@ -453,65 +455,89 @@ void tess(list <vertex> vList,list <triangle> tList)
 					break;	//breaks the for loop, moves the start by 1, goes to start of while
                 }
             }
-			advance(itn,1);
-			vertex c = *itn;
+			
 			bool intAngle = AngleCheck(start,b,a,b,b,c);
 			if(ib == false && intAngle == true)	//if there are no tess line intersections
 			{					
-				//draws the tess line
+				/*//draws the tess line
 				glBegin(GL_LINES);
 				glVertex2f(start.x,start.y);
 				glVertex2f(b.x,b.y);
 				glEnd();
-				glFlush();
+				glFlush();*/
 				
                 //adds to tList
-				triangle t;
-				t.tone = start;
-				t.ttwo = a;
-				t.tthree = b;
-            	tList.push_back(t);
+				tList.push_back(start);
+                tList.push_back(a);
+                tList.push_back(b);
 				
-				//creates the vertex to delete from vList, and removes it
-				vertex d;
-                d = *prev(prev(itn));
-            	cout <<"removed: "<< d.x << " "<< d.y<< endl;
-            	vList.erase(prev(prev(itn)));
-
+				//delete vertex a from vList, and itn = itnn
+				cout <<"removed: "<< a.x << " "<< a.y<< endl;
+            	itn = vList.erase(itn);
+                //vList.erase(itn);
+                cout << "vList: " << endl;
 				//prints the rest of vList after removal
             	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
             	{
                 	cout << (*i).x <<" "<<(*i).y << endl;
             	}
-				count++;
+				
 			} else
             {
+                cout << "AngleCheck Fail" <<endl;
                 cwCount++;
+                if(cwCount >= vList.size())
+                {
+                    cwCount = 0;
+                }
+
             }
         }
 		else	//cw
 		{
 			cwCount++;
 			cout <<cpv.z<<endl;
-			break;
+			if(cwCount > vList.size())
+            {
+                cwCount = 0;
+            }
+            break;
 		}
     }
-	//will need to fix, code for when the last triangle is added
-	/*list<vertex>::iterator it1=vList.begin();
-	triangle t1;
-	t1.tone = *it1;
-	advance(it1,1);
-	t1.ttwo = *it1;
-	advance(it1,1);
-	t1.tthree = *it1;
-	tList.push_back(t1);*/
-    /*for(list<triangle>::iterator p=tList.begin(); p!=tList.end(); p++)
+	//creates the last 3 vertices from vList
+	list<vertex>::iterator it1=vList.begin();
+	vertex v1,v2,v3;
+    v1 = *it1;
+    advance(it1,1);
+    v2 = *it1;
+    advance(it1,1);
+    v3 = *it1;
+
+    //adds the last 3 vertices to the tList
+    tList.push_back(v1);
+    tList.push_back(v2);
+    tList.push_back(v3);
+
+    int i = 0;  //counts to 3, prints the vertices in their triangles    
+    for(list<vertex>::iterator p=tList.begin(); p!=tList.end(); p++)
     {
-        cout << "Triangle " << p << ": " << endl;
-        cout << (*p).one.x << " " << (*p).one.y << endl;
-        cout << (*p).two.x << " " << (*p).two.y << endl;
-        cout << (*p).three.x << " " << (*p).three.y << endl;
-    }*/
+        if(i % 3 == 0)
+        {
+            cout << "Triangle: " << endl;
+            list<vertex>::iterator y = p;
+            vertex s,f;
+            s = *y;
+            advance(y,2);
+            f = *y;
+            //cout << "s: " << s.x << " " << s.y << endl;
+            //cout << "f: " << f.x << " " << f.y << endl;
+            drawLinSeg(s,f);
+        }
+        
+        cout << (*p).x << " " << (*p).y << endl;
+        i++;
+    }
+
 }
 
 void mouse( int button, int state, int x, int y )
@@ -521,7 +547,7 @@ void mouse( int button, int state, int x, int y )
         //tests if the polygon is not built and there is at least one vertex built
 		if(poly == false && vList.size() > 0)
 		{
-			vertex prev_v = *prev(vList.end());
+			vertex prev_v = vList.back();//*prev(vList.end());
 			vertex v;
 			v.x = x;
 			v.y = WINDOW_MAX_Y -y;
@@ -529,7 +555,7 @@ void mouse( int button, int state, int x, int y )
 			//lList.push_back(v);
 			printf("v: %d   %d\n", x,y);
 			linseg l;
-			linseg prev_l = *prev(LList.end());
+			linseg prev_l = LList.back();//*prev(LList.end());
 			l.one = prev_v;
 			l.two = v;
 			bool ib1=false;
