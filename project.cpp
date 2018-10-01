@@ -23,6 +23,7 @@ struct triangle {
     vertex ttwo;
 	vertex tthree;
 };
+list <vertex> saveList;
 list <linseg> LList;    //holds the line segments
 list <vertex> tList;    //holds the triangle vertices
 list <vertex> vList;    //holds the vertices in the order they are drawn
@@ -307,18 +308,38 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     	cout << (*i).x <<" "<<(*i).y << endl;
     }
 	//counts the number of cw vertices to keep track of where the start vertex should be
-    int Count = 0;
-	int intersectCount = 0;
-    while(vList.size() > 3)
+    //int Count = 0;
+	//int intersectCount = 0;
+	bool advanceStart = false;
+    bool start = true;
+	saveList = vList;
+	list<vertex>::iterator its = saveList.begin(); //keeps track of the starting vertex
+    list<vertex>::iterator itn = saveList.begin(); //keeps track of the next vertices
+    list<vertex>::iterator itnn = saveList.begin();
+    list<vertex>::iterator itl = saveList.begin();
+	/*vertex start,a,b,c;
+	start = *its;
+	advance(itn,1);
+    a = *itn;
+    advance(itnn,2);    
+    b = *itnn;
+    advance(itl,3);
+    c = *itl;*/
+	//saveList = vList;
+    //vertex last = vList.back(); //keeps track of the last vertex in the list
+	while(saveList.size() > 3)
     {
-        list<vertex>::iterator its = vList.begin();	//keeps track of the starting vertex
-		vertex start = vList.front();	//first vertex in vList
-		list<vertex>::iterator itn = vList.begin();	//keeps track of the next vertices
-        list<vertex>::iterator itnn = vList.begin();		
-		list<vertex>::iterator itl = vList.begin();
+        
+		/*list<vertex>::iterator its;	//keeps track of the starting vertex
+		//vertex start = vList.front();	//first vertex in vList
+		list<vertex>::iterator itn;	//keeps track of the next vertices
+        list<vertex>::iterator itnn;		
+		list<vertex>::iterator itl;*/
+		vertex last = saveList.back();	//keeps track of the last vertex in the list
+		vertex start,a,b,c;
 		//stores the next 2 vertices from the start in vList to a and b
-		vertex a,b,c;
-        if(Count <= vList.size()-4)//2)	//handles the number of cw vertices
+		//vertex start,a,b,c;
+        /*if(Count <= vList.size()-4)//2)	//handles the number of cw vertices
 		{
 			advance(its,Count);	//advances its to new start
 			start = *its;
@@ -338,10 +359,98 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
         	b = *itnn;
             advance(itl,Count+4 - vList.size()+1);
             c = *itl;
-		}
-		
+		}*/
+
+		//handles moving the iterators to the next vertex in the list
+		if(advanceStart == true)
+		{
+			if((*itl).x == last.x && (*itl).y == last.y)
+			{
+				advanceStart = false;
+				advance(its,1);
+            	start = *its;
+				advance(itn,1);
+                a = *itn;
+				advance(itnn,1);
+                b = *itnn;
+                itl = saveList.begin();
+				c = *itl;
+			} else if((*itnn).x == last.x && (*itnn).y == last.y)
+			{
+				advanceStart = false;
+                advance(its,1);
+                start = *its;
+                advance(itn,1);
+                a = *itn;
+                itnn = saveList.begin();
+                b = *itnn;
+                advance(itl,1);
+                c = *itl;
+			} else if((*itn).x == last.x && (*itn).y == last.y)
+            {
+                advanceStart = false;
+                advance(its,1);
+                start = *its;
+				itn = saveList.begin();
+                a = *itn;
+                advance(itnn,1);
+                b = *itnn;
+                advance(itl,1);
+                c = *itl;
+			} else if((*its).x == last.x && (*its).y == last.y)
+            {
+                advanceStart = false;
+                its = saveList.begin();
+				start = *its;
+				advance(itn,1);
+                a = *itn;
+                advance(itnn,1);
+                b = *itnn;
+                advance(itl,1);
+                c = *itl;
+            } else
+			{
+				advanceStart = false;
+				advance(its,1);
+            	start = *its;
+            	advance(itn,1);
+            	a = *itn;
+            	advance(itnn,1);
+            	b = *itnn;
+				advance(itl,1);
+            	c = *itl;
+			}
+		} else
+		{
+			its = saveList.begin();
+    		itn = saveList.begin();
+			itnn = saveList.begin();
+    		itl = saveList.begin();
+    		//vertex start,a,b,c;
+    		start = *its;
+    		advance(itn,1);
+    		a = *itn;
+    		advance(itnn,2);
+    		b = *itnn;
+    		advance(itl,3);
+    		c = *itl;
+		}		
+		/*if(advanceRest == true)
+		{
+			start = *its;
+                advance(itn,1);
+                a = *itnn;
+                advance(itnn,1);
+                b = *itnn;
+                advance(itl,1);
+                c = *itl;
+		}*/
 		//calculates the cross product for the given vertices
-        vertex cpv = cp1(start,a,b);
+        cout <<"start: "<< start.x << " "<< start.y<< endl;
+		cout <<"a: "<< a.x << " "<< a.y<< endl;
+		cout <<"b: "<< b.x << " "<< b.y<< endl;
+		cout <<"c: "<< c.x << " "<< c.y<< endl;
+		vertex cpv = cp1(start,a,b);
 		//tests ccw or cw
         if(cpv.z < 0.0)
         {        
@@ -363,7 +472,7 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
                 }
             }
 			
-			bool intAngle = AngleCheck(start,b,a,b,b,c);
+			bool intAngle = AngleCheck(b,start,b,a,b,c);//b,start,a,b,b,c);
 			if(ib == false && intAngle == true)	//if there are no tess line intersections
 			{					
 				/*//draws the tess line
@@ -380,52 +489,42 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 				
 				//delete vertex a from vList, and itn = itnn
 				cout <<"removed: "<< a.x << " "<< a.y<< endl;
-            	itn = vList.erase(itn);
-                //vList.erase(itn);
+            	//vList.remove(a);
+				/*if(a.x == (*itn).x && a.y == (*itn).y)
+				{
+					vList.remove(a);
+				}*/
+				itn = saveList.erase(itn);
+                //*itn = *itnn;
+				//vList.erase(itn);
                 cout << "vList: " << endl;
 				//prints the rest of vList after removal
-            	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
+            	for(list<vertex>::iterator i=saveList.begin(); i!=saveList.end(); i++)
             	{
                 	cout << (*i).x <<" "<<(*i).y << endl;
-            	}
-				
+            	}cout << " " << endl;
+				//advanceRest = true;
+				/*start = *prev(its);
+				advance(itn,1);
+                a = *itn;
+                advance(itnn,1);
+                b = *itnn;
+                advance(itl,1);
+                c = *itl;*/				
 			} else
             {
                 cout << "AngleCheck Fail or tess line intersection fail" <<endl;
-                /*if(Count == vList.size())
-                {
-                    Count = 0;
-                }
-                else {
-                    Count++;
-                }*/
-                Count++;
-                cout << "cwCount (A): " << Count << endl;
+                advanceStart = true;
             }
         }
 		else	//cw
 		{
-			//cwCount++;
+			advanceStart = true;
 			cout <<cpv.z<<endl;
-			/*if(Count == vList.size())
-            {
-                Count = 0;
-            }
-            else {
-                Count++;
-            }*/
-            Count++;
-            //break;
-            cout << "cwCount: "<<Count << endl;
-            //break;
-		}
-        if(Count > 20)
-        {
-            break;
         }
     }
 	//creates the last 3 vertices from vList
-	list<vertex>::iterator it1=vList.begin();
+	list<vertex>::iterator it1=saveList.begin();
 	vertex v1,v2,v3;
     v1 = *it1;
     advance(it1,1);
@@ -437,11 +536,52 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     tList.push_back(v1);
     tList.push_back(v2);
     tList.push_back(v3);
+	int f = 0;
+	for(list<vertex>::iterator i=tList.begin(); i!=tList.end(); i++)
+    {
+	    //cout << (*i).x <<" "<<(*i).y << endl;
+		if(f % 3 == 0)
+		{
+			cout << "Triangle: " << endl;
+			list<vertex>::iterator y = i;
+            vertex s,f;
+            s = *y;
+            advance(y,2);
+            f = *y;
+            cout << "s: " << s.x << " " << s.y << endl;
+            cout << "f: " << f.x << " " << f.y << endl;
+            drawLinSeg(s,f);
+		}
+		cout << (*i).x <<" "<<(*i).y << endl;
+		f++;
 
-    int i = 0;  //counts to 3, prints the vertices in their triangles    
+    }
+
+	/*list<vertex>::iterator p=tList.begin();
+	for(int i = 0; i <= tList.size(); i++)
+	{
+		cout << "Triangle: " << endl;
+		cout << (*p).x << " " << (*p).y << endl;
+		advance(p,1);
+		cout << (*p).x << " " << (*p).y << endl;
+        advance(p,1);
+		cout << (*p).x << " " << (*p).y << endl;
+        //advance(p,1);
+        i++;
+		i++;
+	}*/
+	
+    /*int i = 0;  //counts to 3, prints the vertices in their triangles    
     for(list<vertex>::iterator p=tList.begin(); p!=tList.end(); p++)
     {
-        if(i % 3 == 0)
+		cout << "Triangle: " << endl;
+        for(int i = 0; i < 2; i++)
+		{
+			cout << (*p).x << " " << (*p).y << endl;
+			advance(p,1);
+			
+		}
+		if(i % 3 == 0)
         {
             cout << "Triangle: " << endl;
             list<vertex>::iterator y = p;
@@ -449,14 +589,16 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
             s = *y;
             advance(y,2);
             f = *y;
-            //cout << "s: " << s.x << " " << s.y << endl;
-            //cout << "f: " << f.x << " " << f.y << endl;
+            cout << "s: " << s.x << " " << s.y << endl;
+            cout << "f: " << f.x << " " << f.y << endl;
             drawLinSeg(s,f);
         }
         
         cout << (*p).x << " " << (*p).y << endl;
         i++;
-    }
+		advance(p,2);
+
+    }*/
 
 }
 
