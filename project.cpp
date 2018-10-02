@@ -1,16 +1,13 @@
-
-
-// An OpenGL Keyboard and Mouse Interaction Program
+//used Dr. Pounds's code interact.c as the basic skeleton for this project
 
 #include <GL/glut.h>
 #include <stdio.h>
 #include <iostream> 
 #include <list> 
 #include <math.h>
-#define PI 3.14159265358979
 using namespace std;
-// These are defined in a global scope
 
+//vertex and linseg structs
 struct vertex {
     float x, y, z;
 };
@@ -23,7 +20,7 @@ struct triangle {
     vertex ttwo;
 	vertex tthree;
 };
-list <vertex> saveList;
+
 list <linseg> LList;    //holds the line segments
 list <vertex> tList;    //holds the triangle vertices
 list <vertex> vList;    //holds the vertices in the order they are drawn
@@ -101,6 +98,7 @@ void display( void )
     glFlush(); /* clear buffers */
 }
 
+//draws the points on the screen
 void drawBox( float x, float y )
 {
     typedef GLfloat point[2];     
@@ -117,6 +115,7 @@ void drawBox( float x, float y )
      glFlush();
 }
 
+//draws a line segment on the screen using the old vertex and the new one created by the mouse
 void drawLinSeg(vertex old_v, vertex new_v)
 {
     if(old_v.x == 0 && old_v.y == 0)
@@ -131,6 +130,7 @@ void drawLinSeg(vertex old_v, vertex new_v)
     glFlush();
 }
 
+//erases point by coloring in white
 void eraseBox( int x, int y )
 {
     typedef GLfloat point[2];     
@@ -147,15 +147,19 @@ void eraseBox( int x, int y )
     glFlush();
 }
 
+//clears screen
 void clearBox()
 {
        glClear(GL_COLOR_BUFFER_BIT); 
        glFlush();
 }
 
+//returns true if two line segments are intersecting
 bool linIntersect(linseg a, linseg b)
 {
     bool intersect = false;
+
+	//builds the vector equations
     int P1 = b.one.x - a.one.x;
     int P2 = -(b.two.x - b.one.x);
     int P3 = b.one.y - a.one.y;
@@ -170,34 +174,36 @@ bool linIntersect(linseg a, linseg b)
     float P10 = b.one.x - a.one.x;
     float P11 = a.two.y - a.one.y;
     float P12 = b.one.y - a.one.y;
-
+	
+	//takes the determinant of the vector equations
     float d1 = (P1*P4) - (P2*P3);
-    float d2 = (P5*P8) - (P6*P7);
+    float d2 = (P5*P8) - (P6*P7);	//denominator
     float d3 = (P9*P12) - (P10*P11);
 
     float ua = d1/d2;
     float ub = d3/d2;
-    //printf("ua: %f\nub: %f\n",ua,ub);
+    
+	//ua and ub must BOTH be inbetween 0 and 1 to intersect each other
     if(((0.0 < ua) && (ua < 1.0)) && (((0.0 < ub) && (ub < 1.0))))
     {
 		intersect = true;
-/*		cout << a.one.x <<" "<<a.one.y<< endl;
-		cout << a.two.x << " " <<a.two.y <<endl;
-		cout << b.one.x <<" "<<b.one.y<< endl;
-        cout << b.two.x << " " <<b.two.y <<endl;*/
     }
-    float x = a.one.x + ua*(a.two.x - a.one.x);
+    
+	//calculate the x,y coordinates where the lines intersect
+	float x = a.one.x + ua*(a.two.x - a.one.x);
     float y = a.one.y + ua*(a.two.y - a.one.y);
-    //printf("x = %f\ny = %f\n",x,y);
     
     return intersect;
 }
 
+//fills the polygon without using the tesselated triangles
 void fillPoly(list <linseg> LList)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(1.0f,0.0f,0.0f);
-    glBegin(GL_POLYGON);
+	glClear(GL_COLOR_BUFFER_BIT);	
+	glColor3f(1.0f,0.0f,0.0f);	//red
+    
+	//draws the LList using the GL_POLYGON, which then lets us fill it
+	glBegin(GL_POLYGON);
 	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
     {
     	glVertex2f((*it).one.x,(*it).one.y);
@@ -207,10 +213,13 @@ void fillPoly(list <linseg> LList)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glFlush();
 }
+
+//draws all of the line segments in the Llist
 void drawLinSegList(list <linseg> LList)
 {
-    glColor3f(1.0f,0.0f,0.0f);
-    glBegin(GL_LINE_LOOP);
+    glColor3f(1.0f,0.0f,0.0f);	//red
+    //draws the LList using the GL_LINE_LOOP
+	glBegin(GL_LINE_LOOP);
     for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
     {
         glVertex2f((*it).one.x,(*it).one.y);
@@ -220,9 +229,11 @@ void drawLinSegList(list <linseg> LList)
     glFlush();
 }
 
+//returns the original outline of the polygon
 void returnPoly(list <linseg> LList)
 {
-    for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
+    //clears the polygon
+	for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
     {
         glClear(GL_COLOR_BUFFER_BIT);
     	glBegin(GL_POLYGON);
@@ -232,32 +243,41 @@ void returnPoly(list <linseg> LList)
     	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     	glFlush();
 	}
-	drawLinSegList(LList);
+	drawLinSegList(LList);	//used to draw the original outline of the polygon
 }
 
+//calculates the crossproduct of three vertices and returns the vector product
 vertex cp1(vertex v1, vertex v2, vertex v3)
 {
-    vertex a,b;
+    //creates the two vectors from the three vertices
+	vertex a,b;
     a.x = v1.x - v2.x;
     a.y = v1.y - v2.y;
     a.z = 0.0;
     b.x = v3.x - v2.x;
     b.y = v3.y - v2.y;
     b.z = 0.0;
+
+	//calculates the x,y,z components
     float t1 = a.y*b.z;
     float t2 = a.z*b.y;
     float x = (a.y*b.z) - (a.z*b.y);
     float y = (b.z*a.x) - (b.x*a.z);
     float z = (a.x*b.y) - (a.y*b.x);
 
+	//creates a new vertex which stores the cross product vector
     vertex cpv;
     cpv.x = x;
     cpv.y = y;
     cpv.z = z;
-    printf("cross product:     x: %f   y: %f   z: %f\n",cpv.x,cpv.y,cpv.z);
+    
     return cpv;
 }
 
+//determines whether the tesselation line is inside the polygon created
+//a & b are the tesselation vertices, where a is the starting point, and b is the ending point
+//c & d are a = c, d is the vertex inbetween the starting vertex and a
+//e & f are a = c = e, f is the vertex after point a (helps create beta)  
 bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
 {
     bool interior = true;
@@ -270,10 +290,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
     v2.y = d.y - c.y;
     v3.x = f.x - e.x;
     v3.y = f.y - e.y;
-	cout << "v1: "<<v1.x <<" "<<v1.y << endl;
-	cout << "v2: "<<v2.x <<" "<<v2.y << endl;
-	cout << "v3: "<<v3.x <<" "<<v3.y << endl;
-
+	
 	//calculate the dot product for alpha and beta
 	float dpa = (v1.x*v2.x) + (v1.y*v2.y);
 	float dpb = (v2.x*v3.x) + (v2.y*v3.y);
@@ -284,11 +301,9 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
 	float v3m = sqrt((pow(v3.x,2.0))+(pow(v3.y,2.0)));
 
 	//calculate alpha and beta
-	float alpha = acos((dpa/(v1m*v2m)));// * 180.0/PI;
-    float beta = acos((dpb/(v2m*v3m)));// * 180.0/PI;
-    cout << "alpha: " << alpha << endl;
-	cout << "beta: " << beta << endl;
-
+	float alpha = acos((dpa/(v1m*v2m)));
+    float beta = acos((dpb/(v2m*v3m)));
+    
 	//return false if the angle is not interior	
 	if(alpha > beta)
     {
@@ -299,72 +314,33 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
     return interior;
 }	
 
+//tesselates the polygon
 void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)                                    
 {
+	//draws all of the polygon lines on the screen
 	drawLinSegList(LList);
-    cout<<"vList:"<<endl;
-	for(list<vertex>::iterator i=vList.begin(); i!=vList.end(); i++)
-    {
-    	cout << (*i).x <<" "<<(*i).y << endl;
-    }
-	//counts the number of cw vertices to keep track of where the start vertex should be
-    //int Count = 0;
-	//int intersectCount = 0;
-	bool advanceStart = false;
-    bool start = true;
-	saveList = vList;
-	list<vertex>::iterator its = saveList.begin(); //keeps track of the starting vertex
-    list<vertex>::iterator itn = saveList.begin(); //keeps track of the next vertices
-    list<vertex>::iterator itnn = saveList.begin();
-    list<vertex>::iterator itl = saveList.begin();
-	/*vertex start,a,b,c;
-	start = *its;
-	advance(itn,1);
-    a = *itn;
-    advance(itnn,2);    
-    b = *itnn;
-    advance(itl,3);
-    c = *itl;*/
-	//saveList = vList;
-    //vertex last = vList.back(); //keeps track of the last vertex in the list
-	while(saveList.size() > 3)
-    {
-        
-		/*list<vertex>::iterator its;	//keeps track of the starting vertex
-		//vertex start = vList.front();	//first vertex in vList
-		list<vertex>::iterator itn;	//keeps track of the next vertices
-        list<vertex>::iterator itnn;		
-		list<vertex>::iterator itl;*/
-		vertex last = saveList.back();	//keeps track of the last vertex in the list
-		vertex start,a,b,c;
-		//stores the next 2 vertices from the start in vList to a and b
-		//vertex start,a,b,c;
-        /*if(Count <= vList.size()-4)//2)	//handles the number of cw vertices
-		{
-			advance(its,Count);	//advances its to new start
-			start = *its;
-			advance(itn,Count+1);	//advances itn to the next element after the start
-        	a = *itn;
-        	advance(itnn,Count+2);	//advances itn to the next element after a
-        	b = *itnn;
-            advance(itl,Count+3);
-            c = *itl;
-		} else 
-		{
-			advance(its,Count+1 - vList.size()+1);
-            start = *its;
-            advance(itn,Count+2 - vList.size()+1);	//advances itn to the next element after the start
-        	a = *itn;
-        	advance(itnn,Count+3 - vList.size()+1);	//advances itn to the next element after a
-        	b = *itnn;
-            advance(itl,Count+4 - vList.size()+1);
-            c = *itl;
-		}*/
 
+	//boolean set to true if the starting vertex needs to be advanced
+    bool advanceStart = false;
+
+	//the fakeList is a list of vertices that can be freely deleted from so no points are lost
+    list <vertex> fakeList = vList;
+
+	list<vertex>::iterator its = fakeList.begin(); //keeps track of the 1st or starting vertex
+    list<vertex>::iterator itn = fakeList.begin(); //keeps track of the 2nd vertex
+    list<vertex>::iterator itnn = fakeList.begin();//keeps track of the 3rd vertex
+    list<vertex>::iterator itl = fakeList.begin(); //keeps track of the 4th vertex
+	
+	//Tesselates while there are more than 3 vertices in the fakeList
+	while(fakeList.size() > 3)
+    {
+		vertex last = fakeList.back();	//keeps track of the last vertex in the list
+		vertex start,a,b,c;	//redeclares the vertices
+		
 		//handles moving the iterators to the next vertex in the list
 		if(advanceStart == true)
 		{
-			if((*itl).x == last.x && (*itl).y == last.y)
+			if((*itl).x == last.x && (*itl).y == last.y)	//if the last iterator is pointing to the last element 
 			{
 				advanceStart = false;
 				advance(its,1);
@@ -373,34 +349,34 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
                 a = *itn;
 				advance(itnn,1);
                 b = *itnn;
-                itl = saveList.begin();
+                itl = fakeList.begin();
 				c = *itl;
-			} else if((*itnn).x == last.x && (*itnn).y == last.y)
+			} else if((*itnn).x == last.x && (*itnn).y == last.y)	//if the 2nd to last iterator is pointing to the last element
 			{
 				advanceStart = false;
                 advance(its,1);
                 start = *its;
                 advance(itn,1);
                 a = *itn;
-                itnn = saveList.begin();
+                itnn = fakeList.begin();
                 b = *itnn;
                 advance(itl,1);
                 c = *itl;
-			} else if((*itn).x == last.x && (*itn).y == last.y)
+			} else if((*itn).x == last.x && (*itn).y == last.y)		//if the 3rd to last iterator is pointing to the last element
             {
                 advanceStart = false;
                 advance(its,1);
                 start = *its;
-				itn = saveList.begin();
+				itn = fakeList.begin();
                 a = *itn;
                 advance(itnn,1);
                 b = *itnn;
                 advance(itl,1);
                 c = *itl;
-			} else if((*its).x == last.x && (*its).y == last.y)
+			} else if((*its).x == last.x && (*its).y == last.y)		//if the start iterator is pointing to the last element
             {
                 advanceStart = false;
-                its = saveList.begin();
+                its = fakeList.begin();
 				start = *its;
 				advance(itn,1);
                 a = *itn;
@@ -408,7 +384,7 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
                 b = *itnn;
                 advance(itl,1);
                 c = *itl;
-            } else
+            } else					//advance the iterators all by 1
 			{
 				advanceStart = false;
 				advance(its,1);
@@ -420,13 +396,15 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 				advance(itl,1);
             	c = *itl;
 			}
-		} else
-		{
-			its = saveList.begin();
-    		itn = saveList.begin();
-			itnn = saveList.begin();
-    		itl = saveList.begin();
-    		//vertex start,a,b,c;
+		} else						//advanceStart = false, used for when the start does not need to move
+		{	
+			//sets all of the iterators at the start
+			its = fakeList.begin();
+    		itn = fakeList.begin();
+			itnn = fakeList.begin();
+    		itl = fakeList.begin(); 
+			
+			//sets the iterators to the correct position in the list
     		start = *its;
     		advance(itn,1);
     		a = *itn;
@@ -435,85 +413,52 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     		advance(itl,3);
     		c = *itl;
 		}		
-		/*if(advanceRest == true)
-		{
-			start = *its;
-                advance(itn,1);
-                a = *itnn;
-                advance(itnn,1);
-                b = *itnn;
-                advance(itl,1);
-                c = *itl;
-		}*/
+		
 		//calculates the cross product for the given vertices
-        cout <<"start: "<< start.x << " "<< start.y<< endl;
-		cout <<"a: "<< a.x << " "<< a.y<< endl;
-		cout <<"b: "<< b.x << " "<< b.y<< endl;
-		cout <<"c: "<< c.x << " "<< c.y<< endl;
-		vertex cpv = cp1(start,a,b);
-		//tests ccw or cw
-        if(cpv.z < 0.0)
+        vertex cpv = cp1(start,a,b);
+		
+		//tests if it is ccw or cw
+        if(cpv.z < 0.0)	//ccw
         {        
 			//create linseg for tess line can see if any intersect
 			linseg tess;
 			tess.one = start;
 			tess.two = b;
-
-			bool ib=false;
+			
+			//tests if there is an intersection with the current tesselation line segment with the entire list of line segments
+			bool ib=false;	
             for(list<linseg>::iterator t1=LList.begin(); t1!=LList.end(); t1++)
             {
                 ib = linIntersect(tess,*t1);
-                //there is an intersect present with the tess linseg and the one being tested
                 if(ib == true)
                 {
                 	cout << "there is an intersect with the tess linseg." << endl;
-					//cwCount++;
-					break;	//breaks the for loop, moves the start by 1, goes to start of while
+					break;	//breaks the for loop, moves to the beginning of the while loop
                 }
             }
 			
-			bool intAngle = AngleCheck(b,start,b,a,b,c);//b,start,a,b,b,c);
-			if(ib == false && intAngle == true)	//if there are no tess line intersections
+			//determines whether the tesselation line is inside the polygon
+			bool intAngle = AngleCheck(b,start,b,a,b,c);
+
+			if(ib == false && intAngle == true)	//if there are no tesselation line intersections and the tesselation line is inside the polygon
 			{					
-				/*//draws the tess line
-				glBegin(GL_LINES);
-				glVertex2f(start.x,start.y);
-				glVertex2f(b.x,b.y);
-				glEnd();
-				glFlush();*/
-				
                 //adds to tList
 				tList.push_back(start);
                 tList.push_back(a);
                 tList.push_back(b);
 				
-				//delete vertex a from vList, and itn = itnn
+				//delete vertex a from the fakeList, and itn = itnn
 				cout <<"removed: "<< a.x << " "<< a.y<< endl;
-            	//vList.remove(a);
-				/*if(a.x == (*itn).x && a.y == (*itn).y)
-				{
-					vList.remove(a);
-				}*/
-				itn = saveList.erase(itn);
-                //*itn = *itnn;
-				//vList.erase(itn);
-                cout << "vList: " << endl;
-				//prints the rest of vList after removal
-            	for(list<vertex>::iterator i=saveList.begin(); i!=saveList.end(); i++)
+				itn = fakeList.erase(itn);
+                //prints the rest of fakeList after removal
+            	for(list<vertex>::iterator i=fakeList.begin(); i!=fakeList.end(); i++)
             	{
                 	cout << (*i).x <<" "<<(*i).y << endl;
-            	}cout << " " << endl;
-				//advanceRest = true;
-				/*start = *prev(its);
-				advance(itn,1);
-                a = *itn;
-                advance(itnn,1);
-                b = *itnn;
-                advance(itl,1);
-                c = *itl;*/				
-			} else
+            	}
+				cout << " " << endl;				
+			} else	//the start needs to be advanced
             {
-                cout << "AngleCheck Fail or tess line intersection fail" <<endl;
+                cout << "AngleCheck Fail or Tesselation Line Intersection" <<endl;
                 advanceStart = true;
             }
         }
@@ -523,8 +468,8 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 			cout <<cpv.z<<endl;
         }
     }
-	//creates the last 3 vertices from vList
-	list<vertex>::iterator it1=saveList.begin();
+	//creates the last 3 vertices from fakeList
+	list<vertex>::iterator it1=fakeList.begin();
 	vertex v1,v2,v3;
     v1 = *it1;
     advance(it1,1);
@@ -536,11 +481,12 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     tList.push_back(v1);
     tList.push_back(v2);
     tList.push_back(v3);
-	int f = 0;
+	
+	int f = 0;	//counter for printing the triangles
+	//prints the vertices in the order from the tList
 	for(list<vertex>::iterator i=tList.begin(); i!=tList.end(); i++)
     {
-	    //cout << (*i).x <<" "<<(*i).y << endl;
-		if(f % 3 == 0)
+	    if(f % 3 == 0)
 		{
 			cout << "Triangle: " << endl;
 			list<vertex>::iterator y = i;
@@ -548,57 +494,16 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
             s = *y;
             advance(y,2);
             f = *y;
-            cout << "s: " << s.x << " " << s.y << endl;
-            cout << "f: " << f.x << " " << f.y << endl;
             drawLinSeg(s,f);
 		}
 		cout << (*i).x <<" "<<(*i).y << endl;
 		f++;
-
     }
+}
 
-	/*list<vertex>::iterator p=tList.begin();
-	for(int i = 0; i <= tList.size(); i++)
-	{
-		cout << "Triangle: " << endl;
-		cout << (*p).x << " " << (*p).y << endl;
-		advance(p,1);
-		cout << (*p).x << " " << (*p).y << endl;
-        advance(p,1);
-		cout << (*p).x << " " << (*p).y << endl;
-        //advance(p,1);
-        i++;
-		i++;
-	}*/
-	
-    /*int i = 0;  //counts to 3, prints the vertices in their triangles    
-    for(list<vertex>::iterator p=tList.begin(); p!=tList.end(); p++)
-    {
-		cout << "Triangle: " << endl;
-        for(int i = 0; i < 2; i++)
-		{
-			cout << (*p).x << " " << (*p).y << endl;
-			advance(p,1);
-			
-		}
-		if(i % 3 == 0)
-        {
-            cout << "Triangle: " << endl;
-            list<vertex>::iterator y = p;
-            vertex s,f;
-            s = *y;
-            advance(y,2);
-            f = *y;
-            cout << "s: " << s.x << " " << s.y << endl;
-            cout << "f: " << f.x << " " << f.y << endl;
-            drawLinSeg(s,f);
-        }
-        
-        cout << (*p).x << " " << (*p).y << endl;
-        i++;
-		advance(p,2);
-
-    }*/
+//fills the tesselation triangles
+void fillTessPolygon(tList)
+{
 
 }
 
@@ -609,18 +514,17 @@ void mouse( int button, int state, int x, int y )
         //tests if the polygon is not built and there is at least one vertex built
 		if(poly == false && vList.size() > 0)
 		{
-			vertex prev_v = vList.back();//*prev(vList.end());
-			vertex v;
+			vertex prev_v = vList.back();	//gets the last vertex from the vList
+			vertex v;	//new vertex from the mouse
 			v.x = x;
 			v.y = WINDOW_MAX_Y -y;
 			vList.push_back(v); //stores the screen coordinates
-			//lList.push_back(v);
-			printf("v: %d   %d\n", x,y);
-			linseg l;
-			linseg prev_l = LList.back();//*prev(LList.end());
+			printf("v: %d   %d\n", x,y); //prints the screen coordinates
+			linseg l;	//creates the a new linseg between the last vertex and the new one from the mouse 
 			l.one = prev_v;
 			l.two = v;
-			bool ib1=false;
+			
+			bool ib1=false;	//tests if there is an intersection with the current line segment with the entire list of line segments
 			for(list<linseg>::iterator it=LList.begin(); it!=LList.end(); it++)
 			{
 				ib1 = linIntersect(l,*it);
@@ -630,24 +534,21 @@ void mouse( int button, int state, int x, int y )
 					cout << "there is an intersect with the last line segment drawn." << endl;
 					ib1 = false;
 				}
-		
 			}
-			LList.push_back(l);
-			drawBox( x, WINDOW_MAX_Y -y );
-			drawLinSeg(prev_v,v);	
+			LList.push_back(l);	//adds the line segment to the LList
+			drawBox( x, WINDOW_MAX_Y -y );	//draws the vertex
+			drawLinSeg(prev_v,v);		//draws the line segment
 		} else if(poly == false && vList.size() == 0)	//tests if the polygon is not built and no vertex has been built
 		{
-			printf("v: %d   %d\n", x,y);
-			vertex v;
+			vertex v;	//creates the starting vertex
             v.x = x;
             v.y = WINDOW_MAX_Y -y;
-            vList.push_back(v);
+            cout << "v: " << v.x << "   " << v.y << endl;
+			vList.push_back(v);	//adds the vertex to the vList
 		}
-		//drawLinSeg(prev_v,v);
-		//drawBox( x, WINDOW_MAX_Y -y );
     }
 
-  if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
+  if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )	//declares the polygon to be finished, creates the last line segment and adds it to the list
      {
         vertex last_v, start_v;
         last_v = vList.back();
@@ -657,38 +558,31 @@ void mouse( int button, int state, int x, int y )
         last_l.two = start_v;
         LList.push_back(last_l);
         drawLinSeg(last_v,start_v);
-        //printf ("%d   %d\n", x, y);
         poly = true;
 	    eraseBox( x, WINDOW_MAX_Y -y );
      }
-  
-  if ( button == GLUT_MIDDLE_BUTTON && state == GLUT_DOWN )
-     {
-        printf ("%d   %d\n", x, y);
-        clearBox();
-     }
-
 }
-
 
 void keyboard( unsigned char key, int x, int y )
 { 
-    if (key == 'q' || key == 'Q') {
-	exit(0);
+    //exits the program if q or Q is clicked
+	if(key == 'q' || key == 'Q') {
+		exit(0);
     }
-    if ((key == 'f' || key == 'F') && poly == true) {
-        //draw polygon filled in with no tesselation
+	//fills the polygon with no tesselation when the polygon is completed
+    if((key == 'f' || key == 'F') && poly == true) {
         fillPoly(LList);
     }
-    if ((key == 't' || key == 'T') && poly == true) {
-        //show the triangles used in the tesselation and the areas of the triangles IN THE ORDER THEY ARE DRAWN
+	//show the triangles used in the tesselation and the areas of the triangles
+    if((key == 't' || key == 'T') && poly == true) {
         tess(vList,tList,LList);
     }
-    if ((key == 'p' || key == 'P') && poly == true) {
-        //polygons filled in after tesselation
+	//fills in the triangles using the tesselation function
+    if((key == 'p' || key == 'P') && poly == true) {
+        
     }
-    if ((key == 'l' || key == 'L') && poly == true) {
-        //should return the screen to the original outline of the polygon
+	//returns the screen to the original outline of the polygon
+    if((key == 'l' || key == 'L') && poly == true) {
         returnPoly(LList);
     }
 }
