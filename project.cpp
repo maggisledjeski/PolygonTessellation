@@ -25,7 +25,6 @@ list <linseg> LList;    //holds the line segments
 list <vertex> vList;    //holds the vertices in the order they are drawn
 list <triangle> TList;	//holds the triangles from tesselation
 bool poly = false;      //whether the polygon is finished or not
-
 GLubyte red, green, blue;
 int COLORS_DEFINED;
 
