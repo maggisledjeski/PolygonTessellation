@@ -24,6 +24,7 @@ struct triangle {
 list <linseg> LList;    //holds the line segments
 list <vertex> tList;    //holds the triangle vertices
 list <vertex> vList;    //holds the vertices in the order they are drawn
+list <triangle> TList;	//holds the triangles from tesselation
 bool poly = false;      //whether the polygon is finished or not
 
 GLubyte red, green, blue;
@@ -315,7 +316,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
 }	
 
 //tesselates the polygon
-void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)                                    
+void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, list <triangle> TList)                                    
 {
 	//draws all of the polygon lines on the screen
 	drawLinSegList(LList);
@@ -446,6 +447,12 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 				tList.push_back(start);
                 tList.push_back(a);
                 tList.push_back(b);
+				cout << tList.size() << endl;
+				triangle t;
+				t.tone = start;
+				t.ttwo = a;
+				t.tthree = b;
+				TList.push_back(t);
 				
 				//delete vertex a from the fakeList, and itn = itnn
 				cout <<"removed: "<< a.x << " "<< a.y<< endl;
@@ -482,6 +489,13 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
     tList.push_back(v2);
     tList.push_back(v3);
 	
+	//adds the last three vertices to the TList	
+	triangle t;
+    t.tone = v1;
+    t.ttwo = v2;
+    t.tthree = v3;
+    TList.push_back(t);
+
 	int f = 0;	//counter for printing the triangles
 	//prints the vertices in the order from the tList
 	for(list<vertex>::iterator i=tList.begin(); i!=tList.end(); i++)
@@ -502,9 +516,20 @@ void tess(list <vertex> vList,list <vertex> tList, list <linseg> LLlist)
 }
 
 //fills the tesselation triangles
-void fillTessPolygon(tList)
+void fillTessPolygon()
 {
+	glColor3f(0.0f,0.0f,0.0f); 
+	for(list<triangle>::iterator g=TList.begin(); g!=TList.end(); g++)
+    {
+        glColor3f(0.0f,0.0f,0.0f);
 
+		glBegin(GL_POLYGON);
+        glVertex2f((*g).tone.x,(*g).tone.y);
+        glVertex2f((*g).ttwo.x,(*g).ttwo.y);
+    	glVertex2f((*g).tthree.x,(*g).tthree.y);
+		glEnd();
+		glFlush();
+    }	
 }
 
 void mouse( int button, int state, int x, int y )
@@ -575,11 +600,11 @@ void keyboard( unsigned char key, int x, int y )
     }
 	//show the triangles used in the tesselation and the areas of the triangles
     if((key == 't' || key == 'T') && poly == true) {
-        tess(vList,tList,LList);
+        tess(vList,LList);
     }
 	//fills in the triangles using the tesselation function
     if((key == 'p' || key == 'P') && poly == true) {
-        
+        fillTessPolygon();
     }
 	//returns the screen to the original outline of the polygon
     if((key == 'l' || key == 'L') && poly == true) {
