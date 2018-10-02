@@ -5,3 +5,10 @@ The goal of this project was to implement the ear-clipping algorithm of tesselat
 To compile: make project
 To run: project
 
+Left-click to end polygon
+Right-click to add point to polygon
+Hit f or F to fill the polygon with no tesselation after it has been built
+Hit l or L to return to the original outline of the polygon after it has been built
+Hit p or P to fill the polygon after the polygon has been built and tesselated
+Hit t or T to run to tesselate the polygon, giving you the triangles on the screen, the triangle points, and the trianlg area
+Hit q or Q to quit the program
