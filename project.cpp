@@ -7,7 +7,7 @@
 #include <math.h>
 using namespace std;
 
-//vertex and linseg structs
+//vertex, linseg, and triangle structs
 struct vertex {
     float x, y, z;
 };
@@ -22,7 +22,6 @@ struct triangle {
 };
 
 list <linseg> LList;    //holds the line segments
-list <vertex> tList;    //holds the triangle vertices
 list <vertex> vList;    //holds the vertices in the order they are drawn
 list <triangle> TList;	//holds the triangles from tesselation
 bool poly = false;      //whether the polygon is finished or not
@@ -316,7 +315,7 @@ bool AngleCheck(vertex a, vertex b, vertex c, vertex d, vertex e, vertex f)
 }	
 
 //tesselates the polygon
-void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, list <triangle> TList)                                    
+void tess(list <vertex> vList, list <linseg> LLlist)                                    
 {
 	//draws all of the polygon lines on the screen
 	drawLinSegList(LList);
@@ -433,7 +432,7 @@ void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, 
                 ib = linIntersect(tess,*t1);
                 if(ib == true)
                 {
-                	cout << "there is an intersect with the tess linseg." << endl;
+                	cout << "Intersection with the tess linseg." << endl;
 					break;	//breaks the for loop, moves to the beginning of the while loop
                 }
             }
@@ -443,11 +442,7 @@ void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, 
 
 			if(ib == false && intAngle == true)	//if there are no tesselation line intersections and the tesselation line is inside the polygon
 			{					
-                //adds to tList
-				tList.push_back(start);
-                tList.push_back(a);
-                tList.push_back(b);
-				cout << tList.size() << endl;
+                //adds the three vertices to a triangle and adds it to the triangle list
 				triangle t;
 				t.tone = start;
 				t.ttwo = a;
@@ -455,24 +450,23 @@ void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, 
 				TList.push_back(t);
 				
 				//delete vertex a from the fakeList, and itn = itnn
-				cout <<"removed: "<< a.x << " "<< a.y<< endl;
+				//cout <<"removed: "<< a.x << " "<< a.y<< endl;
 				itn = fakeList.erase(itn);
+
                 //prints the rest of fakeList after removal
-            	for(list<vertex>::iterator i=fakeList.begin(); i!=fakeList.end(); i++)
+            	/*for(list<vertex>::iterator i=fakeList.begin(); i!=fakeList.end(); i++)
             	{
                 	cout << (*i).x <<" "<<(*i).y << endl;
             	}
-				cout << " " << endl;				
+				cout << " " << endl;*/				
 			} else	//the start needs to be advanced
             {
-                cout << "AngleCheck Fail or Tesselation Line Intersection" <<endl;
-                advanceStart = true;
+                advanceStart = true; 	//the starting vertex needs to be advanced
             }
         }
 		else	//cw
 		{
-			advanceStart = true;
-			cout <<cpv.z<<endl;
+			advanceStart = true;	//the staring vertex needs to be advanced
         }
     }
 	//creates the last 3 vertices from fakeList
@@ -483,11 +477,6 @@ void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, 
     v2 = *it1;
     advance(it1,1);
     v3 = *it1;
-
-    //adds the last 3 vertices to the tList
-    tList.push_back(v1);
-    tList.push_back(v2);
-    tList.push_back(v3);
 	
 	//adds the last three vertices to the TList	
 	triangle t;
@@ -496,23 +485,23 @@ void tess(list <vertex> vList,/*list <vertex> tList,*/ list <linseg> LLlist)//, 
     t.tthree = v3;
     TList.push_back(t);
 
-	int f = 0;	//counter for printing the triangles
-	//prints the vertices in the order from the tList
-	for(list<vertex>::iterator i=tList.begin(); i!=tList.end(); i++)
+	//prints the triangles and gives the area of the triangles
+	for(list<triangle>::iterator g=TList.begin(); g!=TList.end(); g++)
     {
-	    if(f % 3 == 0)
-		{
-			cout << "Triangle: " << endl;
-			list<vertex>::iterator y = i;
-            vertex s,f;
-            s = *y;
-            advance(y,2);
-            f = *y;
-            drawLinSeg(s,f);
-		}
-		cout << (*i).x <<" "<<(*i).y << endl;
-		f++;
-    }
+		cout << "Triangle: " << endl;
+		cout << (*g).tone.x << " " << (*g).tone.y << endl;
+        cout << (*g).ttwo.x << " " << (*g).ttwo.y << endl;
+        cout << (*g).tthree.x << " " << (*g).tthree.y << endl;
+        
+		drawLinSeg((*g).tone,(*g).ttwo);	//draws the tesselation line segment
+		drawLinSeg((*g).tthree,(*g).ttwo);	//draws the line segment between vertices 2 and 3
+		drawLinSeg((*g).tone,(*g).tthree);	//draws the line segment between vertices 1 and 3
+		
+		//calculates the area of the triangle
+		vertex f = cp1((*g).tone,(*g).ttwo,(*g).tthree);
+        float area = abs((f.z)/2);
+        cout << "Area: " << area << endl;
+	}
 }
 
 //fills the tesselation triangles
@@ -612,10 +601,8 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
-
 int main(int argc, char** argv)
 {
-
     myglutInit(argc,argv); /* Set up Window */
     myInit(); /* set attributes */
 
@@ -626,4 +613,3 @@ int main(int argc, char** argv)
     glutDisplayFunc(display); /* Display callback invoked when window opened */
     glutMainLoop(); /* enter event loop */
 }
-
